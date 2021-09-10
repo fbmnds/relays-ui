@@ -1,6 +1,10 @@
 ﻿.container {
          display: flex;
-         align-items: baseline;
+         align-items: center;
+}
+
+.container-disabled {
+         background-color: #109090;
 }
 
 .toggle-switch {
@@ -64,7 +68,7 @@
 	 cursor: not-allowed;
 }
  .toggle-switch-disabled:before {
-	 background-color: #109090;
+	 background-color: #ddd;
 	 cursor: not-allowed;
 }
  .toggle-switch-inner:after {

@@ -102,14 +102,11 @@
                            checked ,checked
                            disabled ,disabled
                            on-change ,toggle-relay)))
-         (rx:react-element :div (rx:{} class-name "container")
-                           (rx:react-element :div nil
-                                             (rx:react-element -toggle-switch
-                                                               props))
-                           (rx:react-element -alert (rx:{} variant (if ,disabled
-                                                                       "warning"
-                                                                       "light")
-                                                           text ,text)))))))
+         (rx:react-element :div (rx:{} class-name (if ,disabled
+                                                      "container container-disabled"
+                                                      "container"))
+                           (rx:react-element -toggle-switch props)
+                           (rx:react-element :div nil ,text))))))
 
 (rx:defm render-relay-switch (relay-nr tag)
   (let ((fname (make-symbol (format nil "-relay-switch~a" relay-nr))))
