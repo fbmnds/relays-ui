@@ -27,8 +27,7 @@
        (rx:react-element :label
                          (rx:{} class-name "toggle-switch-label"
                                 html-for id@
-                                tab-index (if disabled@ -1 1)
-                                on-key-down handle-key-press)
+                                tab-index (if disabled@ -1 1))
                          (inner-span)
                          (switch-span))
        (rx:react-element :div nil)))
@@ -103,11 +102,14 @@
                            checked ,checked
                            disabled ,disabled
                            on-change ,toggle-relay)))
-         (rx:react-element :div nil
-                           (rx:react-element -toggle-switch props)
-                           (rx:react-element :label
-                                             nil
-                                             ,text))))))
+         (rx:react-element :div (rx:{} class-name "container")
+                           (rx:react-element :div nil
+                                             (rx:react-element -toggle-switch
+                                                               props))
+                           (rx:react-element -alert (rx:{} variant (if ,disabled
+                                                                       "warning"
+                                                                       "light")
+                                                           text ,text)))))))
 
 (rx:defm render-relay-switch (relay-nr tag)
   (let ((fname (make-symbol (format nil "-relay-switch~a" relay-nr))))

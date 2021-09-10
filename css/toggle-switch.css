@@ -1,4 +1,9 @@
-﻿.toggle-switch {
+﻿.container {
+         display: flex;
+         align-items: baseline;
+}
+
+.toggle-switch {
 	 position: relative;
 	 margin-right: 10px;
 	 width: 75px;
@@ -59,7 +64,7 @@
 	 cursor: not-allowed;
 }
  .toggle-switch-disabled:before {
-	 background-color: #ddd;
+	 background-color: #109090;
 	 cursor: not-allowed;
 }
  .toggle-switch-inner:after {

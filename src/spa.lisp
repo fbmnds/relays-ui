@@ -5,7 +5,9 @@
 (defparameter *app-js*
   (apply #'concatenate 'string
          (cons
-          (ps:ps* `(toggle-switch-fn))
+          (ps:ps* `(progn
+                     (alert-fn)
+                     (toggle-switch-fn)))
           (mapcar #'(lambda (i)
                      (let ((state (format nil "relay~a" i)))
                        (ps:ps*
