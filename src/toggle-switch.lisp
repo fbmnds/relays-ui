@@ -69,27 +69,39 @@
 (rx:defm toggle-relay-fn (relay-nr url)
   `(rx:js (format nil "async function toggleRelay~a () { 
     try {
+        setDisabled~a(true);
         const response = await fetch('~a/r~a', {
             mode: 'no-cors',
             cache: 'no-cache'
         });
-        setRelay~a(!relay~a)
+        setRelay~a(!relay~a);
+        setDisabled~a(false);
         return true;
-    } catch (e) { return null; }
-}" ,relay-nr ,url ,relay-nr ,relay-nr ,relay-nr)))
+    } catch (e) { setDisabled~a(false); return null; }
+}"
+                  ,relay-nr
+                  ,relay-nr
+                  ,url ,relay-nr
+                  ,relay-nr ,relay-nr
+                  ,relay-nr ,relay-nr
+                  ,relay-nr)))
 
 (rx:defm relay-switch-fn (state relay-nr text url)
   (let ((id (format nil "r~a" relay-nr))
         (fname (make-symbol (format nil "-relay-switch~a" relay-nr)))
         (toggle-relay (make-symbol (format nil "toggle-relay~a" relay-nr)))
-        (checked (make-symbol (format nil "relay-~a" relay-nr))))
+        (checked (make-symbol (format nil "relay-~a" relay-nr)))
+        (disabled-str (format nil "disabled~a" relay-nr))
+        (disabled (make-symbol (format nil "disabled-~a" relay-nr))))
     `(defun ,fname ()
        (rx:use-state ,state 'false)
+       (rx:use-state ,disabled-str 'false)
        (toggle-relay-fn ,relay-nr ,url)
        (let ((props (rx:{} id ,id
                            html-for ,id
                            text ,text
                            checked ,checked
+                           disabled ,disabled
                            on-change ,toggle-relay)))
          (rx:react-element :div nil
                            (rx:react-element -toggle-switch props)
