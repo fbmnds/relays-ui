@@ -3,19 +3,16 @@
 
 
 (defparameter *app-js*
-  (apply #'concatenate 'string
-         (cons
-          (ps:ps* `(progn
-                     (alert-fn)
-                     (toggle-switch-fn)))
-          (mapcar #'(lambda (i)
-                     (let ((state (format nil "relay~a" i)))
-                       (ps:ps*
-                        `(progn
-                           (relay-switch-fn ,state ,i ,state ,*relay-url*)
-                           (render-relay-switch ,i ,state)
-                           ))))
-                 '(1 2 3 4)))))
+  (ps:ps* `(progn
+             (alert-fn)
+             (toggle-switch-fn)
+             (relay-switch-fn 1)
+             (relay-switch-fn 2)
+             (relay-switch-fn 3)
+             (relay-switch-fn 4)
+             (relay-url-fn)
+             (relays-fn)
+             (render-relays))))
 
 (defmacro index ()
   (let ((divs (map 'list (lambda (v) `(:div :id ,v))
@@ -36,7 +33,9 @@
          (:script :type "application/javascript" :src "/js/react-dom.js")
          (:script :type "application/javascript" :src "/js/react-bootstrap.js"))
         (:body
+         (:div :id "relays" :class "relays")
          ,@divs
+         (:div :id "url")
          (:script :type "application/javascript" :src "/js/App.js"))))))
 
 (defun handler (env)
