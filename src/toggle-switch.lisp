@@ -68,7 +68,6 @@
 (rx:defm status-relay-fn ()
   `(rx:js (format nil "
     function statusRelay () { 
-    var res;
     try {
         setDisabled1(true);
         setDisabled2(true);
@@ -82,16 +81,18 @@
               setRelay2(state.r2===1?true:false);
               setRelay3(state.r3===1?true:false);
               setRelay4(state.r4===1?true:false);
-              res = true;
+              setDisabled1(false);
+              setDisabled2(false);
+              setDisabled3(false);
+              setDisabled4(false);
         });
     } catch (e) { 
-        res = null; 
+        setDisabled1(false);
+        setDisabled2(false);
+        setDisabled3(false);
+        setDisabled4(false);
     }
-    setDisabled1(false);
-    setDisabled2(false);
-    setDisabled3(false);
-    setDisabled4(false);
-    return res;
+    return null;
 }" ,*relay-url*)))
 
 (rx:defm toggle-relay-fn ()
