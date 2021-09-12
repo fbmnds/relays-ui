@@ -31,29 +31,28 @@
       (:div :id "relays" :class "relays")
       (:script :type "application/javascript" :src "/js/App.js")))))
 
-(defun route (env path rc hdr body &optional ends-with)
-  (o:match env
-      ((o:guard (o:property :path-info path-info)
-                (if ends-with
-                    (a:ends-with-subseq path path-info)
-                    (a:starts-with-subseq path path-info)))
-       (if (pathnamep body)
-           `(,rc ,hdr ,body)
-           `(,rc ,hdr (,body))))))
+(defun route (env-path path rc hdr body &optional ends-with)
+  (when (if ends-with
+            (a:ends-with-subseq path env-path)
+            (a:starts-with-subseq path env-path))
+    (if (pathnamep body)
+        `(,rc ,hdr ,body)
+        `(,rc ,hdr (,body)))))
 
 (defun handler (env)
-  (let ((js-hdr '(:content-type "application/javascript")))
+  (let ((js-hdr '(:content-type "application/javascript"))
+        (path (getf env :path-info)))
     (handler-case
         (or
-         (route env "/index.html" 200 nil *index*)
-         (route env "/js/react.js" 200 js-hdr *react*)
-         (route env "/js/react-dom.js" 200 js-hdr *react-dom*)
-         (route env "/js/react-bootstrap.js" 200 js-hdr *react-bootstrap*)
-         (route env "/js/App.js" 200 js-hdr *app-js*)
-         (route env "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)
-         (route env "/css/bootstrap.css" 200 nil *bootstrap-css* t)
-         (route env "/js/bootstrap-bundle.js" 200 js-hdr *bootstrap-bundle-js*)
-         (route env "/assets/favicon.ico"
+         (route path "/index.html" 200 nil *index*)
+         (route path "/js/react.js" 200 js-hdr *react*)
+         (route path "/js/react-dom.js" 200 js-hdr *react-dom*)
+         (route path "/js/react-bootstrap.js" 200 js-hdr *react-bootstrap*)
+         (route path "/js/App.js" 200 js-hdr *app-js*)
+         (route path "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)
+         (route path "/css/bootstrap.css" 200 nil *bootstrap-css* t)
+         (route path "/js/bootstrap-bundle.js" 200 js-hdr *bootstrap-bundle-js*)
+         (route path "/assets/favicon.ico"
                 200 '(:content-type "image/x-icon") *favicon* t)
          `(404 nil (,(format nil "Path not found~%"))))
       (t (e) (if *debug*
