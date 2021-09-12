@@ -14,36 +14,29 @@
              (relays-fn)
              (render-relays))))
 
-(defmacro index ()
-  (let ((divs (map 'list (lambda (v) `(:div :id ,v))
-                   '("relay1"
-                     "relay2"
-                     "relay3"
-                     "relay4"))))
-    `(sp:with-html-string
-       (:doctype)
-       (:html
-        (:head
-         (:title "Hello React")
-         (:link :rel "stylesheet" :href "/css/bootstrap.css")
-         (:link :rel "stylesheet" :href "/css/toggle-switch.css")
-         (:link :rel "icon" :href "/assets/favicon.ico")
-         (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
-         (:script :type "application/javascript" :src "/js/react.js")
-         (:script :type "application/javascript" :src "/js/react-dom.js")
-         (:script :type "application/javascript" :src "/js/react-bootstrap.js"))
-        (:body
-         (:div :id "relays" :class "relays")
-         ,@divs
-         (:div :id "url")
-         (:script :type "application/javascript" :src "/js/App.js"))))))
+(defparameter *index*
+  (sp:with-html-string
+    (:doctype)
+    (:html
+     (:head
+      (:title "Hello React")
+      (:link :rel "stylesheet" :href "/css/bootstrap.css")
+      (:link :rel "stylesheet" :href "/css/toggle-switch.css")
+      (:link :rel "icon" :href "/assets/favicon.ico")
+      (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
+      (:script :type "application/javascript" :src "/js/react.js")
+      (:script :type "application/javascript" :src "/js/react-dom.js")
+      (:script :type "application/javascript" :src "/js/react-bootstrap.js"))
+     (:body
+      (:div :id "relays" :class "relays")
+      (:script :type "application/javascript" :src "/js/App.js")))))
 
 (defun handler (env)
   (handler-case
       (o:match env
         ((o:guard (o:property :path-info path)
                   (a:starts-with-subseq "/index.html" path))
-         `(200 nil (,(index))))
+         `(200 nil (,*index*)))
         ((o:guard (o:property :path-info path)
                   (a:starts-with-subseq "/js/react.js" path))
          `(200 (:content-type "application/javascript") (,*react*)))
