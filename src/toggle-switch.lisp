@@ -127,8 +127,6 @@
 (rx:defm relay-switch-fn (relay-nr)
   (let ((id (format nil "r~a" relay-nr))
         (fname (make-symbol (format nil "-relay-switch~a" relay-nr)))
-        ;;(toggle-relay (make-symbol (format nil "toggle-relay~a" relay-nr)))
-        (disabled (make-symbol (format nil "disabled-~a" relay-nr)))
         (text (format nil "Relay ~a" relay-nr)))
     `(defun ,fname (props)
        (let ((props2 (rx:{} id ,id
@@ -138,7 +136,7 @@
                            disabled (rx:@ props disabled)
                            option-labels (ps:array " " " ")
                            on-change (ps:@ props on-change))))
-         (rx:react-element :div (rx:{} class-name (if (rx:@ props2 ,disabled)
+         (rx:react-element :div (rx:{} class-name (if (rx:@ props2 disabled)
                                                       "relay relay-disabled"
                                                       "relay"))
                            (rx:react-element -toggle-switch props2)
@@ -151,9 +149,8 @@
                           (rx:doc-element ,tag))))
 
 (rx:defm relay-url-fn ()
-  `(defun -relay-url ()
-     (rx:react-element -Alert (rx:{} variant "info"
-                                     text ,*relay-url*))))
+  `(defun -relay-url (props)
+     (rx:react-element -Alert props)))
 
 (rx:defm render-relay-url (tag)
   `(rx:react-dom-render (rx:react-element -relay-url)
@@ -196,7 +193,14 @@
                                checked relay4
                                disabled disabled4
                                on-change (rx:tlambda () (toggle-relay 4))))
-      (rx:react-element -relay-url nil))))
+      (rx:react-element -relay-url (rx:{} variant
+                                          (if (or disabled1
+                                                  disabled2
+                                                  disabled3
+                                                  disabled4)
+                                              "info"
+                                              "light")
+                                          text ,*relay-url*)))))
 
 (rx:defm render-relays ()
   `(progn
