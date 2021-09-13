@@ -6,10 +6,14 @@
   (ps:ps* `(progn
              (alert-fn)
              (rx:toggle-switch-fn)
-             (relay-switch-fn 1)
-             (relay-switch-fn 2)
-             (relay-switch-fn 3)
-             (relay-switch-fn 4)
+             (relay-switch-fn "-relays-16-e5-f0" 1)
+             (relay-switch-fn "-relays-16-e5-f0" 2)
+             (relay-switch-fn "-relays-16-e5-f0" 3)
+             (relay-switch-fn "-relays-16-e5-f0" 4)
+             (relay-switch-fn "-relays-4-d-c-c5-f" 1)
+             (relay-switch-fn "-relays-4-d-c-c5-f" 2)
+             (relay-switch-fn "-relays-4-d-c-c5-f" 3)
+             (relay-switch-fn "-relays-4-d-c-c5-f" 4)
              (relay-url-fn)
              (relays-fn -relays-16-e5-f0
                         "http://192.168.178.37" "ESP-16E5F0")

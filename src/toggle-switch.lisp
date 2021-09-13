@@ -36,7 +36,7 @@
   `(rx:js (format nil "function toggleRelay (relay_nr,url) { 
     relay_nr===1?setDisabled1(true):
     relay_nr===2?setDisabled2(true):
-    relay_nr===3?setDisabled3(true):
+   relay_nr===3?setDisabled3(true):
     relay_nr===4?setDisabled4(true):
     console.log('error relay_nr ' + relay_nr); 
     
@@ -62,10 +62,11 @@
 })();
 }")))
 
-(rx:defm relay-switch-fn (relay-nr)
-  (let ((id (format nil "r~a" relay-nr))
-        (fname (make-symbol (format nil "-relay-switch~a" relay-nr)))
-        (text (format nil "Relay ~a" relay-nr)))
+(rx:defm relay-switch-fn (fname-root relay-nr)
+  (let* ((root (format nil "~a-~a" fname-root relay-nr))
+         (fname (make-symbol root))
+         (id (remove #\- root))
+         (text (format nil "Relay ~a" relay-nr)))
     `(defun ,fname (props)
        (let ((props2 (rx:{} id ,id
                            html-for ,id
@@ -80,8 +81,8 @@
                            (rx:react-element -toggle-switch props2)
                            (rx:react-element :div nil ,text))))))
 
-(rx:defm render-relay-switch (relay-nr)
-  (let ((fname (make-symbol (format nil "-relay-switch~a" relay-nr)))
+(rx:defm render-relay-switch (url-label relay-nr)
+  (let ((fname (make-symbol (format nil "~a~a" url-label relay-nr)))
         (tag (format nil "relay~a" relay-nr)))
     `(rx:react-dom-render (rx:react-element ,fname)
                           (rx:doc-element ,tag))))
@@ -95,51 +96,56 @@
                         (rx:doc-element ,tag)))
 
 (rx:defm relays-fn (fname url url-label)
-  `(defun ,fname (props)
-     (defvar url ,url)
-     (rx:use-state "relay1" 'false)
-     (rx:use-state "relay2" 'false)
-     (rx:use-state "relay3" 'false)
-     (rx:use-state "relay4" 'false)
-     (rx:use-state "disabled1" 'false)
-     (rx:use-state "disabled2" 'false)
-     (rx:use-state "disabled3" 'false)
-     (rx:use-state "disabled4" 'false)
-     (toggle-relay-fn)
-     (status-relay-fn)
-     (rx:tlambda () (status-relay url))
-     (rx:js "React.useEffect(() => { statusRelay(url); }, []);")
-     (rx:react-element
-      :div nil
-      (rx:react-element -relay-switch1
-                        (rx:{} id "r1"
-                               checked relay1
-                               disabled disabled1
-                               on-change (rx:tlambda ()
-                                                     (toggle-relay 1 url))))
-      (rx:react-element -relay-switch2
-                        (rx:{} id "r2"
-                               checked relay2
-                               disabled disabled2
-                               on-change (rx:tlambda () (toggle-relay 2 url))))
-      (rx:react-element -relay-switch3
-                        (rx:{} id "r3"
-                               checked relay3
-                               disabled disabled3
-                               on-change (rx:tlambda () (toggle-relay 3 url))))
-      (rx:react-element -relay-switch4
-                        (rx:{} id "r4"
-                               checked relay4
-                               disabled disabled4
-                               on-change (rx:tlambda () (toggle-relay 4 url))))
-      (rx:react-element -relay-url (rx:{} variant
-                                          (if (or disabled1
-                                                  disabled2
-                                                  disabled3
-                                                  disabled4)
-                                              "info"
-                                              "light")
-                                          text ,url-label)))))
+  (let* ((fn- (symbol-name fname))
+         (fname1 (make-symbol (format nil "~a-1" fn-)))
+         (fname2 (make-symbol (format nil "~a-2" fn-)))
+         (fname3 (make-symbol (format nil "~a-3" fn-)))
+         (fname4 (make-symbol (format nil "~a-4" fn-))))
+    `(defun ,fname (props)
+       (defvar url ,url)
+       (rx:use-state "relay1" 'false)
+       (rx:use-state "relay2" 'false)
+       (rx:use-state "relay3" 'false)
+       (rx:use-state "relay4" 'false)
+       (rx:use-state "disabled1" 'false)
+       (rx:use-state "disabled2" 'false)
+       (rx:use-state "disabled3" 'false)
+       (rx:use-state "disabled4" 'false)
+       (toggle-relay-fn)
+       (status-relay-fn)
+       (rx:tlambda () (status-relay url))
+       (rx:js "React.useEffect(() => { statusRelay(url); }, []);")
+       (rx:react-element
+        :div nil
+        (rx:react-element ,fname1
+                          (rx:{} id ,fname1
+                                 checked relay1
+                                 disabled disabled1
+                                 on-change (rx:tlambda ()
+                                                       (toggle-relay 1 url))))
+        (rx:react-element ,fname2
+                          (rx:{} id ,fname2
+                                 checked relay2
+                                 disabled disabled2
+                                 on-change (rx:tlambda () (toggle-relay 2 url))))
+        (rx:react-element ,fname3
+                          (rx:{} id ,fname3
+                                 checked relay3
+                                 disabled disabled3
+                                 on-change (rx:tlambda () (toggle-relay 3 url))))
+        (rx:react-element ,fname4
+                          (rx:{} id ,fname4
+                                 checked relay4
+                                 disabled disabled4
+                                 on-change (rx:tlambda () (toggle-relay 4 url))))
+        (rx:react-element -relay-url (rx:{} variant
+                                            (if (or disabled1
+                                                    disabled2
+                                                    disabled3
+                                                    disabled4)
+                                                "info"
+                                                "light")
+                                            text ,url-label))))))
 
 (rx:defm render-relays ()
   `(progn
