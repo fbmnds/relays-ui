@@ -11,7 +11,10 @@
              (relay-switch-fn 3)
              (relay-switch-fn 4)
              (relay-url-fn)
-             (relays-fn)
+             (relays-fn -relays-16-e5-f0
+                        "http://192.168.178.37" "ESP-16E5F0")
+             (relays-fn -relays-4-d-c-c5-f
+                        "http://192.168.178.63" "ESP-4DCC5F")
              (render-relays))))
 
 (defparameter *index*
@@ -28,7 +31,8 @@
       (:script :type "application/javascript" :src "/js/react-dom.js")
       (:script :type "application/javascript" :src "/js/react-bootstrap.js"))
      (:body
-      (:div :id "relays" :class "relays")
+      (:div :id "ESP-16E5F0" :class "relays")
+      (:div :id "ESP-4DCC5F" :class "relays")
       (:script :type "application/javascript" :src "/js/App.js")))))
 
 (defun handler (env)

@@ -4,13 +4,13 @@
 
 (rx:defm status-relay-fn ()
   `(rx:js (format nil "
-    function statusRelay () { 
+    function statusRelay (url) { 
     try {
         setDisabled1(true);
         setDisabled2(true);
         setDisabled3(true);
         setDisabled4(true);
-        fetch('~a/?')
+        fetch(url + '/?')
         .then(r => r.json())
         .then(state => {
               console.log(state);
@@ -30,10 +30,10 @@
         setDisabled4(false);
     }
     return null;
-}" ,*relay-url*)))
+}")))
 
 (rx:defm toggle-relay-fn ()
-  `(rx:js (format nil "function toggleRelay (relay_nr) { 
+  `(rx:js (format nil "function toggleRelay (relay_nr,url) { 
     relay_nr===1?setDisabled1(true):
     relay_nr===2?setDisabled2(true):
     relay_nr===3?setDisabled3(true):
@@ -42,7 +42,7 @@
     
 (function () {
     try {
-        fetch('~a/r' + relay_nr)
+        fetch(url + '/r' + relay_nr)
         .then(res => res.json())
         .then(state => {
               setRelay1(state.r1===1?true:false);
@@ -60,7 +60,7 @@
         return null;
     }
 })();
-}" ,*relay-url*)))
+}")))
 
 (rx:defm relay-switch-fn (relay-nr)
   (let ((id (format nil "r~a" relay-nr))
@@ -94,8 +94,9 @@
   `(rx:react-dom-render (rx:react-element -relay-url)
                         (rx:doc-element ,tag)))
 
-(rx:defm relays-fn ()
-  `(defun -relays (props)
+(rx:defm relays-fn (fname url url-label)
+  `(defun ,fname (props)
+     (defvar url ,url)
      (rx:use-state "relay1" 'false)
      (rx:use-state "relay2" 'false)
      (rx:use-state "relay3" 'false)
@@ -106,8 +107,8 @@
      (rx:use-state "disabled4" 'false)
      (toggle-relay-fn)
      (status-relay-fn)
-     (rx:tlambda () (status-relay))
-     (rx:js "React.useEffect(() => { statusRelay(); }, []);")
+     (rx:tlambda () (status-relay url))
+     (rx:js "React.useEffect(() => { statusRelay(url); }, []);")
      (rx:react-element
       :div nil
       (rx:react-element -relay-switch1
@@ -115,22 +116,22 @@
                                checked relay1
                                disabled disabled1
                                on-change (rx:tlambda ()
-                                                     (toggle-relay 1))))
+                                                     (toggle-relay 1 url))))
       (rx:react-element -relay-switch2
                         (rx:{} id "r2"
                                checked relay2
                                disabled disabled2
-                               on-change (rx:tlambda () (toggle-relay 2))))
+                               on-change (rx:tlambda () (toggle-relay 2 url))))
       (rx:react-element -relay-switch3
                         (rx:{} id "r3"
                                checked relay3
                                disabled disabled3
-                               on-change (rx:tlambda () (toggle-relay 3))))
+                               on-change (rx:tlambda () (toggle-relay 3 url))))
       (rx:react-element -relay-switch4
                         (rx:{} id "r4"
                                checked relay4
                                disabled disabled4
-                               on-change (rx:tlambda () (toggle-relay 4))))
+                               on-change (rx:tlambda () (toggle-relay 4 url))))
       (rx:react-element -relay-url (rx:{} variant
                                           (if (or disabled1
                                                   disabled2
@@ -138,12 +139,14 @@
                                                   disabled4)
                                               "info"
                                               "light")
-                                          text ,*relay-url*)))))
+                                          text ,url-label)))))
 
 (rx:defm render-relays ()
   `(progn
-     (rx:react-dom-render (rx:react-Element -Relays nil)
-                          (rx:doc-element "relays"))))
+     (rx:react-dom-render (rx:react-Element -relays-16-e5-f0 nil)
+                          (rx:doc-element "ESP-16E5F0"))
+     (rx:react-dom-render (rx:react-Element -relays-4-d-c-c5-f nil)
+                          (rx:doc-element "ESP-4DCC5F"))))
 
 
 

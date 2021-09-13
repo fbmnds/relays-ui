@@ -3,7 +3,7 @@
 
 (defparameter *debug* t)
 
-(defparameter *relay-url* "http://192.168.178.37")
+(defparameter *relay-url* '("http://ESP-16E5F0" "http://ESP-4DCC5F"))
 
 (defparameter *paths* (make-hash-table))
 
