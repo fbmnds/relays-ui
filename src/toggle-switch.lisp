@@ -106,8 +106,8 @@
      (rx:use-state "disabled4" 'false)
      (toggle-relay-fn)
      (status-relay-fn)
-     (rx:js "(function () { statusRelay(); }).bind(this); 
-             React.useEffect(() => { statusRelay(); }, []);")
+     (rx:tlambda () (status-relay))
+     (rx:js "React.useEffect(() => { statusRelay(); }, []);")
      (rx:react-element
       :div nil
       (rx:react-element -relay-switch1
