@@ -129,19 +129,22 @@
                                  class-name "relay"
                                  checked relay2
                                  disabled disabled2
-                                 on-change (rx:tlambda () (toggle-relay 2 url))))
+                                 on-change (rx:tlambda ()
+                                                       (toggle-relay 2 url))))
         (rx:react-element ,fname3
                           (rx:{} id ,fname3
                                  class-name "relay"
                                  checked relay3
                                  disabled disabled3
-                                 on-change (rx:tlambda () (toggle-relay 3 url))))
+                                 on-change (rx:tlambda ()
+                                                       (toggle-relay 3 url))))
         (rx:react-element ,fname4
                           (rx:{} id ,fname4
                                  class-name "relay"
                                  checked relay4
                                  disabled disabled4
-                                 on-change (rx:tlambda () (toggle-relay 4 url))))
+                                 on-change (rx:tlambda ()
+                                                       (toggle-relay 4 url))))
         (rx:react-element -relay-url (rx:{} variant
                                             (if (or disabled1
                                                     disabled2
@@ -174,7 +177,7 @@
                                (relay-tab "-relays-16-e5-f0" "ESP-16E5F0"
                                           (rx:react-element -relays-16-e5-f0 nil))
                                (relay-tab "-relays-4-d-c-c5-f" "ESP-4DCC5F"
-                                          (rx:react-element -relays-4-d-c-c5-f)))
+                                          (rx:react-element -relays-4-d-c-c5-f nil)))
       (rx:doc-element ,tag))))
 
 

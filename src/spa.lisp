@@ -19,7 +19,8 @@
                         "http://192.168.178.37"
                         "ESP-16E5F0")
              (relays-fn -relays-4-d-c-c5-f
-                        "http://192.168.178.63" "ESP-4DCC5F")
+                        "http://192.168.178.63"
+                        "ESP-4DCC5F")
              (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays"))))
 
 (defparameter *index*
