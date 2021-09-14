@@ -126,19 +126,19 @@
                                                        (toggle-relay 1 url))))
         (rx:react-element ,fname2
                           (rx:{} id ,fname2
-                                 class-name
+                                 class-name "relay"
                                  checked relay2
                                  disabled disabled2
                                  on-change (rx:tlambda () (toggle-relay 2 url))))
         (rx:react-element ,fname3
                           (rx:{} id ,fname3
-                                 class-name
+                                 class-name "relay"
                                  checked relay3
                                  disabled disabled3
                                  on-change (rx:tlambda () (toggle-relay 3 url))))
         (rx:react-element ,fname4
                           (rx:{} id ,fname4
-                                 class-name
+                                 class-name "relay"
                                  checked relay4
                                  disabled disabled4
                                  on-change (rx:tlambda () (toggle-relay 4 url))))
