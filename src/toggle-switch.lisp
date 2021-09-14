@@ -119,22 +119,26 @@
         :div nil
         (rx:react-element ,fname1
                           (rx:{} id ,fname1
+                                 class-name "relay"
                                  checked relay1
                                  disabled disabled1
                                  on-change (rx:tlambda ()
                                                        (toggle-relay 1 url))))
         (rx:react-element ,fname2
                           (rx:{} id ,fname2
+                                 class-name
                                  checked relay2
                                  disabled disabled2
                                  on-change (rx:tlambda () (toggle-relay 2 url))))
         (rx:react-element ,fname3
                           (rx:{} id ,fname3
+                                 class-name
                                  checked relay3
                                  disabled disabled3
                                  on-change (rx:tlambda () (toggle-relay 3 url))))
         (rx:react-element ,fname4
                           (rx:{} id ,fname4
+                                 class-name
                                  checked relay4
                                  disabled disabled4
                                  on-change (rx:tlambda () (toggle-relay 4 url))))
@@ -153,6 +157,25 @@
                           (rx:doc-element "ESP-16E5F0"))
      (rx:react-dom-render (rx:react-Element -relays-4-d-c-c5-f nil)
                           (rx:doc-element "ESP-4DCC5F"))))
+
+
+(rx:defm relay-tab (event-key title element)
+  `(rx:react-bootstrap-tab* -tab
+                            (rx:{} event-key ,event-key title ,title)
+                            ,element))
+
+(rx:defm tabs (active-key id class-name tag)
+  `(progn
+     (rx:react-dom-render
+      (rx:react-bootstrap-tab* -tabs
+                               (rx:{} default-active-key ,active-key
+                                      id ,id
+                                      class-name ,class-name)
+                               (relay-tab "-relays-16-e5-f0" "ESP-16E5F0"
+                                          (rx:react-element -relays-16-e5-f0 nil))
+                               (relay-tab "-relays-4-d-c-c5-f" "ESP-4DCC5F"
+                                          (rx:react-element -relays-4-d-c-c5-f)))
+      (rx:doc-element ,tag))))
 
 
 
