@@ -3,134 +3,73 @@
 (in-package :relays-ui)
 
 
-(defparameter *scene*
-"
-var renderer, scene, camera;
-
-var line;
-var MAX_POINTS = 50000;
-var drawCount;
-
-init();
-//animate();
-
-function init() {
-
-	// info
-	var info = document.createElement( 'div' );
-	info.style.position = 'absolute';
-	info.style.top = '30px';
-	info.style.width = '100%';
-	info.style.textAlign = 'center';
-	info.style.color = '#fff';
-	info.style.fontWeight = 'bold';
-	info.style.backgroundColor = 'transparent';
-	info.style.zIndex = '1';
-	info.style.fontFamily = 'Monospace';
-	info.innerHTML = \"three.js animataed line using BufferGeometry\";
-	document.body.appendChild( info );
-
-	// renderer
-	renderer = new THREE.WebGLRenderer();
-	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setSize( window.innerWidth, window.innerHeight );
-	//document.body.appendChild( renderer.domElement );
-
-	// scene
-	scene = new THREE.Scene();
-
-	// camera
-	camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-	camera.position.set( 0, 0, 1000 );
-
-	// geometry
-	var geometry = new THREE.BufferGeometry();
-
-	// attributes
-	var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
-	geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-
-	// drawcalls
-	drawCount = 2; // draw the first 2 points, only
-	geometry.setDrawRange( 0, drawCount );
-
-	// material
-	var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
-
-	// line
-	line = new THREE.Line( geometry,  material );
-	scene.add( line );
-
-	// update positions
-	updatePositions();
-
-}
-
-// update positions
-function updatePositions() {
-
-	var positions = line.geometry.attributes.position.array;
-
-	var x = y = z = index = 0;
-
-	for ( var i = 0, l = MAX_POINTS; i < l; i ++ ) {
-
-		positions[ index ++ ] = x;
-		positions[ index ++ ] = y;
-		positions[ index ++ ] = z;
-
-                if (i%2500 === 0) {
-                    x = y = z = 0.;
-                } else {
-		    x += ( Math.random() - 0.5 ) * 30;
-		    y += ( Math.random() - 0.5 ) * 30;
-		    z += ( Math.random() - 0.5 ) * 30;
-                }
-	}
-
-}
-
-// render
-function render() {
-
-	renderer.render( scene, camera );
-
-}
-
-// animate
-function animate() {
-
-	//requestAnimationFrame( animate );
-
-	drawCount = ( drawCount + 1 ) % MAX_POINTS;
-
-	line.geometry.setDrawRange( 0, drawCount );
-
-	if ( drawCount === 0 ) {
-
-		// periodically, generate new data
-
-		updatePositions();
-
-		line.geometry.attributes.position.needsUpdate = true; // required after the first render
-
-		line.material.color.setHSL( Math.random(), 1, 0.5 );
-
-	}
-
-	render();
-
-        requestAnimationFrame( animate );
-}")
-
-
-
+(rx:defm three-fn ()
+  `(progn
+     (defvar *max_points* 50000)
+     (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
+     (defvar scene (ps:new (ps:chain -t-h-r-e-e (-scene))))
+     (defvar camera (ps:new (ps:chain
+                             -t-h-r-e-e
+                             (-perspective-camera
+                              45
+                              (/ (ps:@ window inner-width)
+                                 (ps:@ window inner-height))
+                              1 1000))))
+     (defvar geometry (ps:new (ps:chain -t-h-r-e-e (-buffer-geometry))))
+     (defvar positions (ps:new (-float32-array (* 3 *max_points*))))
+     (defvar material (ps:new (ps:chain -t-h-r-e-e (-line-basic-material
+                                                    (rx:{} color #xff0000
+                                                           linewidth 2)))))
+     (defvar line (ps:new (ps:chain -t-h-r-e-e (-line geometry material))))
+     (defvar draw-count 2)
+     (defun update-positions ()
+       (let ((pos (ps:@ line geometry attributes position array))
+             x y z)
+         (dotimes (i *max_points*)
+           (if (= (ps:% i 2500) 0)
+               (setf x 0 y 0 z 0)
+               (setf x (+ x (* (- (ps:chain -math (random)) 0.5) 30))
+                     y (+ y (* (- (ps:chain -math (random)) 0.5) 30))
+                     z (+ z (* (- (ps:chain -math (random)) 0.5) 30))))
+           (setf (ps:@ pos (* 3 i)) x)
+           (setf (ps:@ pos (+ (* 3 i) 1)) y)
+           (setf (ps:@ pos (+ (* 3 i) 3)) z))))
+     (defun init ()
+       (ps:chain renderer (set-pixel-ratio (ps:@ window device-pixel-ratio)))
+       (ps:chain renderer (set-size (ps:@ window inner-width)
+                                    (ps:@ window inner-height)))
+       (ps:chain camera position (set 0 0 1000))
+       (ps:chain geometry
+                 (set-attribute "position"
+                                (ps:new (ps:chain -t-h-r-e-e
+                                                  (-buffer-attribute
+                                                   positions 3)))))
+       (ps:chain geometry (set-draw-range 0 draw-count))
+       (ps:chain scene (add line))
+       (update-positions))
+     (defun render ()
+       (ps:chain renderer (render scene camera)))
+     (defun animate ()
+       (request-animation-frame animate)
+       (setf draw-count (ps:% (+ 1 draw-count) *max_points*))
+       (ps:chain line geometry (set-draw-range 0 draw-count))
+       (when (= draw-count 0)
+         ((ps:@ console log) "drawCount 0")
+         (update-positions)
+         (setf (ps:@ line geometry attributes position needs-update) true))
+       (when (= 0 (ps:% (+ 1 draw-count) 500))
+           (ps:chain line material color
+                   (set-h-s-l (ps:chain -math (random)) 1 0.5)))
+       (ps:chain renderer (render scene camera)))
+     (init)
+     (animate)))
 
 (rx:defm lines-fn ()
   `(defun -lines (props)
        (rx:react-element :div
-                         (rx:{} id "lines"))))
-
+                         (rx:{} id "lines"
+                                width (ps:@ window inner-width)
+                                height (ps:@ window inner-height) ))))
 
 (rx:defm lines-tab ()
   `(rx:react-bootstrap-tab* -tab
