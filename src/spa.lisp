@@ -21,7 +21,13 @@
              (relays-fn -relays-4-d-c-c5-f
                         "http://192.168.178.63"
                         "ESP-4DCC5F")
-             (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays"))))
+             (rx:js ,*scene*)
+             (lines-fn)
+             (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
+             (let ((dom-element (rx:doc-element "lines")))
+               (rx:js ,*scene*)
+               ((ps:@ dom-element append-child) (ps:@ renderer dom-element))
+               (animate)))))
 
 (defparameter *index*
   (sp:with-html-string
@@ -35,7 +41,8 @@
       (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
       (:script :type "application/javascript" :src "/js/react.js")
       (:script :type "application/javascript" :src "/js/react-dom.js")
-      (:script :type "application/javascript" :src "/js/react-bootstrap.js"))
+      (:script :type "application/javascript" :src "/js/react-bootstrap.js")
+      (:script :type "application/javascript" :src "/js/three.js"))
      (:body
       (:div :id "relays")
       (:script :type "application/javascript" :src "/js/App.js")))))
@@ -49,6 +56,7 @@
          (rx:route path "/js/react.js" 200 js-hdr *react*)
          (rx:route path "/js/react-dom.js" 200 js-hdr *react-dom*)
          (rx:route path "/js/react-bootstrap.js" 200 js-hdr *react-bootstrap*)
+         (rx:route path "/js/three.js" 200 js-hdr *three*)
          (rx:route path "/js/App.js" 200 js-hdr *app-js*)
          (rx:route path "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)
          (rx:route path "/css/bootstrap.css" 200 nil *bootstrap-css* t)

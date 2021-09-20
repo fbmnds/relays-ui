@@ -20,6 +20,9 @@
 (setf (gethash :assets *paths*)
       (merge-pathnames #p"js-libs/assets/"
                        (gethash :projects *paths*)))
+(setf (gethash :three *paths*)
+      (merge-pathnames #p"js-libs/three.0.127.0/build/"
+                       (gethash :projects *paths*)))
 
 (defparameter *react*
   (uiop:read-file-string (merge-pathnames #p"react.17.0.2.js"
@@ -47,6 +50,10 @@
 (defparameter *react-bootstrap*
   (uiop:read-file-string (merge-pathnames #p"react-bootstrap.min.js"
                                           (gethash :bootstrap *paths*))))
+
+(defparameter *three*
+  (uiop:read-file-string (merge-pathnames #p"three.min.js"
+                                          (gethash :three *paths*))))
 
 (defparameter *favicon* (merge-pathnames #p"favicon.ico"
                                          (gethash :assets *paths*)))

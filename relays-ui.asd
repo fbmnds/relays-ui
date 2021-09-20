@@ -26,7 +26,9 @@
     :components
     ((:file "env")
      (:file "alerts")
-     (:file "toggle-switch")
+     (:file "relays")
+     (:file "lines")
+     (:file "tabs")
      (:file "spa")))
 #|
    (:module "t"
