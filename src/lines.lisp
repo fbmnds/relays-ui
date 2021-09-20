@@ -8,7 +8,7 @@
 var renderer, scene, camera;
 
 var line;
-var MAX_POINTS = 500;
+var MAX_POINTS = 50000;
 var drawCount;
 
 init();
@@ -79,10 +79,13 @@ function updatePositions() {
 		positions[ index ++ ] = y;
 		positions[ index ++ ] = z;
 
-		x += ( Math.random() - 0.5 ) * 30;
-		y += ( Math.random() - 0.5 ) * 30;
-		z += ( Math.random() - 0.5 ) * 30;
-
+                if (i%2500 === 0) {
+                    x = y = z = 0.;
+                } else {
+		    x += ( Math.random() - 0.5 ) * 30;
+		    y += ( Math.random() - 0.5 ) * 30;
+		    z += ( Math.random() - 0.5 ) * 30;
+                }
 	}
 
 }
@@ -97,7 +100,7 @@ function render() {
 // animate
 function animate() {
 
-	requestAnimationFrame( animate );
+	//requestAnimationFrame( animate );
 
 	drawCount = ( drawCount + 1 ) % MAX_POINTS;
 
@@ -117,6 +120,7 @@ function animate() {
 
 	render();
 
+        requestAnimationFrame( animate );
 }")
 
 
