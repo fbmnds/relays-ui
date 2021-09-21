@@ -23,6 +23,9 @@
 (setf (gethash :three *paths*)
       (merge-pathnames #p"js-libs/three.0.127.0/build/"
                        (gethash :projects *paths*)))
+(setf (gethash :three-examples *paths*)
+      (merge-pathnames #p"js-libs/three.0.127.0/examples/"
+                       (gethash :projects *paths*)))
 
 (defparameter *react*
   (uiop:read-file-string (merge-pathnames #p"react.17.0.2.js"
@@ -54,6 +57,14 @@
 (defparameter *three*
   (uiop:read-file-string (merge-pathnames #p"three.min.js"
                                           (gethash :three *paths*))))
+
+(defparameter *three-module*
+  (uiop:read-file-string (merge-pathnames #p"three.module.js"
+                                          (gethash :three *paths*))))
+
+(defparameter *orbit-controls*
+  (uiop:read-file-string (merge-pathnames #p"jsm/controls/OrbitControls.js"
+                                          (gethash :three-examples *paths*))))
 
 (defparameter *favicon* (merge-pathnames #p"favicon.ico"
                                          (gethash :assets *paths*)))
