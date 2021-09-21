@@ -5,31 +5,32 @@
 (defparameter *app-js*
   (ps:ps*
    `(progn
-      (alert-fn)
-      (rx:toggle-switch-fn)
-      (relay-switch-fn "-relays-16-e5-f0" 1)
-      (relay-switch-fn "-relays-16-e5-f0" 2)
-      (relay-switch-fn "-relays-16-e5-f0" 3)
-      (relay-switch-fn "-relays-16-e5-f0" 4)
-      (relay-switch-fn "-relays-4-d-c-c5-f" 1)
-      (relay-switch-fn "-relays-4-d-c-c5-f" 2)
-      (relay-switch-fn "-relays-4-d-c-c5-f" 3)
-      (relay-switch-fn "-relays-4-d-c-c5-f" 4)
-      (relay-url-fn)
-      (relays-fn -relays-16-e5-f0
-                 "http://192.168.178.37"
-                 "ESP-16E5F0")
-      (relays-fn -relays-4-d-c-c5-f
-                 "http://192.168.178.63"
-                 "ESP-4DCC5F")
-      (lines-fn)
-      (three-fn)
-      (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
-      (let ((dom-element (rx:doc-element "lines")))
-        (ps:chain renderer (set-size (ps:@ window inner-width)
-                                     (ps:@ window inner-height)))
-        ((ps:@ dom-element append-child)
-         (ps:chain renderer dom-element))))))
+     (ps:defvar *__ps_mv_reg*)
+     (alert-fn)
+     (rx:toggle-switch-fn)
+     (relay-switch-fn "-relays-16-e5-f0" 1)
+     (relay-switch-fn "-relays-16-e5-f0" 2)
+     (relay-switch-fn "-relays-16-e5-f0" 3)
+     (relay-switch-fn "-relays-16-e5-f0" 4)
+     (relay-switch-fn "-relays-4-d-c-c5-f" 1)
+     (relay-switch-fn "-relays-4-d-c-c5-f" 2)
+     (relay-switch-fn "-relays-4-d-c-c5-f" 3)
+     (relay-switch-fn "-relays-4-d-c-c5-f" 4)
+     (relay-url-fn)
+     (relays-fn -relays-16-e5-f0
+                "http://192.168.178.37"
+                "ESP-16E5F0")
+     (relays-fn -relays-4-d-c-c5-f
+                "http://192.168.178.63"
+                "ESP-4DCC5F")
+     (lines-fn)
+     (three-fn)
+     (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
+     (let ((dom-element (rx:doc-element "lines")))
+       (ps:chain renderer (set-size (ps:@ window inner-width)
+                                    (ps:@ window inner-height)))
+       ((ps:@ dom-element append-child)
+        (ps:chain renderer dom-element))))))
 
 (defparameter *index*
   (sp:with-html-string
@@ -44,12 +45,10 @@
       (:script :type "application/javascript" :src "/js/react.js")
       (:script :type "application/javascript" :src "/js/react-dom.js")
       (:script :type "application/javascript" :src "/js/react-bootstrap.js")
-      (:script :type "application/javascript" :src "/js/three.js")
-      (:script :type "application/javascript" :src "/js/three.module.js")
-      (:script :type "application/javascript" :src "/js/OrbitControls.js"))
+      (:script :type "application/javascript" :src "/js/three.js"))
      (:body
       (:div :id "relays")
-      (:script :type "application/javascript" :src "/js/App.js")))))
+      (:script :type "module" :src "/js/App.js")))))
 
 (defun handler (env)
   (let ((js-hdr '(:content-type "application/javascript"))
@@ -62,6 +61,7 @@
          (rx:route path "/js/react-bootstrap.js" 200 js-hdr *react-bootstrap*)
          (rx:route path "/js/three.js" 200 js-hdr *three*)
          (rx:route path "/js/three.module.js" 200 js-hdr *three-module*)
+         (rx:route path "/build/three.module.js" 200 js-hdr *three-module*)
          (rx:route path "/js/OrbitControls.js" 200 js-hdr *orbit-controls*)
          (rx:route path "/js/App.js" 200 js-hdr *app-js*)
          (rx:route path "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)
@@ -73,4 +73,5 @@
       (t (e) (if *debug*
                  `(500 nil (,(format nil "Internal Server Error~%~A~%" e)))
                  `(500 nil (,(format nil "Internal Server Error"))))))))
+
 
