@@ -44,8 +44,7 @@
       (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
       (:script :type "application/javascript" :src "/js/react.js")
       (:script :type "application/javascript" :src "/js/react-dom.js")
-      (:script :type "application/javascript" :src "/js/react-bootstrap.js")
-      (:script :type "application/javascript" :src "/js/three.js"))
+      (:script :type "application/javascript" :src "/js/react-bootstrap.js"))
      (:body
       (:div :id "relays")
       (:script :type "module" :src "/js/App.js")))))
