@@ -28,6 +28,7 @@
      (:file "alerts")
      (:file "relays")
      (:file "lines")
+     (:file "range")
      (:file "tabs")
      (:file "spa")))
 #|

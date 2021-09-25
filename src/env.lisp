@@ -42,6 +42,10 @@
   (uiop:read-file-string (merge-pathnames #p"toggle-switch.css"
                                           (gethash :css *paths*))))
 
+(defparameter *slider-css*
+  (uiop:read-file-string (merge-pathnames #p"slider.css"
+                                          (gethash :css *paths*))))
+
 (defparameter *bootstrap-css*
   (uiop:read-file-string (merge-pathnames #p"bootstrap-5.0.2.min.css"
                                           (gethash :bootstrap *paths*))))

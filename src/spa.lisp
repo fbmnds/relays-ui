@@ -24,11 +24,12 @@
                 "http://192.168.178.63"
                 "ESP-4DCC5F")
      (lines-fn)
+     (range-fn)
      (three-fn)
      (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
      (let ((dom-element (rx:doc-element "lines")))
-       (ps:chain renderer (set-size (ps:@ window inner-width)
-                                    (ps:@ window inner-height)))
+       (ps:chain renderer (set-size (* 0.75 (ps:@ window inner-width))
+                                    (* 0.75 (ps:@ window inner-height))))
        ((ps:@ dom-element append-child)
         (ps:chain renderer dom-element))))))
 
@@ -39,6 +40,7 @@
      (:head
       (:title "Hello React")
       (:link :rel "stylesheet" :href "/css/bootstrap.css")
+      (:link :rel "stylesheet" :href "/css/slider.css")
       (:link :rel "stylesheet" :href "/css/toggle-switch.css")
       (:link :rel "icon" :href "/assets/favicon.ico")
       (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
@@ -64,6 +66,7 @@
          (rx:route path "/js/OrbitControls.js" 200 js-hdr *orbit-controls*)
          (rx:route path "/js/App.js" 200 js-hdr *app-js*)
          (rx:route path "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)
+         (rx:route path "/css/slider.css" 200 nil *slider-css* t)
          (rx:route path "/css/bootstrap.css" 200 nil *bootstrap-css* t)
          (rx:route path "/js/bootstrap-bundle.js" 200 js-hdr *bootstrap-bundle-js*)
          (rx:route path "/assets/favicon.ico"

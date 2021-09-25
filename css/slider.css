@@ -1,0 +1,32 @@
+.range-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.styled-range {
+    position: relative;
+    border-radius: 3px;
+    background: #dddddd;
+    height: 15px;
+}
+
+.styled-range-progress {
+    border-radius: 3px;
+    position: absolute;
+    height: 100%;
+    opacity: 0.5;
+    background: #2f855a;
+}
+
+.styled-thumb {
+    width: 10px;
+    height: 25px;
+    border-radius: 3px;
+    position: relative;
+    top: -5px;
+    opacity: 0.5;
+    background: #2f855a;
+    cursor: pointer;
+}
+
+
