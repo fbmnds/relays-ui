@@ -21,7 +21,7 @@
        (when (= (ps:typeof n) "number") (ps:chain n (to-fixed 0))))
      (defun -range (props)
 #|
-       (setf (ps:@ props min)
+       (setf 
          (or (ps:@ props min) 0))
        (unless (rx:@ props max)
          (setf (ps:@ props max) 100))
@@ -31,9 +31,10 @@
        (unless (rx:@ props initial)
          (setf (ps:@ props initial) (format-fn (/ (- max min) 2))))
 |#
-       (let* ((initial-percentage
+       (let* ((min@ (or (rx:@ props min) 0))
+              (initial-percentage
                 (get-percentage (ps:@ props initial)
-                                (ps:@ props min)
+                                min@
                                 (ps:@ props max)))
               (range-ref ((ps:@ -react use-ref)))
               (range-progress-ref ((ps:@ -react use-ref)))
@@ -65,7 +66,7 @@
                     (when (> new-x end) (setf new-x end))
                     (let* ((new-percentage (get-percentage new-x start end))
                            (new-value (get-value new-percentage
-                                                 (ps:@ props min)
+                                                 min@
                                                  (ps:@ props max))))
                       (handle-update new-value new-percentage)
                       ((ps:@ props on-change) new-value)))))
@@ -103,7 +104,7 @@ const handleMouseUp = () => {
                     (ps:array (ps:@ props initial) initial-percentage handle-update)))
          (rx-div nil
                  (rx-div (rx:{} class-name "range-header")
-                         (rx-div nil (format-fn (ps:@ props min)))
+                         (rx-div nil (format-fn min@))
                          (rx-div nil
                                  (rx-strong (rx:{} ref current-ref))
                                  " / "
