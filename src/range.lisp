@@ -22,6 +22,10 @@
          (if (rx:@ props format-fn)
              ((rx:@ props format-fn) n)
              (ps:chain n (to-fixed 0)))))
+     (defun on-change (props v)
+       (if (rx:@ props on-change)
+           ((rx:@ props on-change) v)
+           ((ps:@ console log) v)))
      (defun -range (props)
        #|
        (setf                            ; ;
@@ -70,7 +74,7 @@
                     (let* ((new-percentage (get-percentage new-x start end))
                            (new-value (get-value new-percentage min@ max@)))
                       (handle-update new-value new-percentage)
-                      ((ps:@ props on-change) new-value)))))
+                      (on-change props new-value)))))
               
               (handle-mouse-down
                 (lambda (e)
