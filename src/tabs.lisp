@@ -10,14 +10,7 @@
 (rx:defm lines-tab ()
   `(rx:react-bootstrap-tab* -tab
                             (rx:{} event-key "lines" title "Lines")
-                            (rx:react-element -lines nil)
-                            (rx:react-element -range
-                                              (rx:{} min 0
-                                                     max 100
-                                                     initial 50
-                                                     on-change
-                                                     (lambda (v)
-                                                       ((ps:@ console log) v))))))
+                            (rx:react-element -lines nil)))
 
 (rx:defm tabs (active-key id class-name tag)
   `(progn

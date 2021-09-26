@@ -5,33 +5,33 @@
 (defparameter *app-js*
   (ps:ps*
    `(progn
-     (ps:defvar *__ps_mv_reg*)
-     (alert-fn)
-     (rx:toggle-switch-fn)
-     (relay-switch-fn "-relays-16-e5-f0" 1)
-     (relay-switch-fn "-relays-16-e5-f0" 2)
-     (relay-switch-fn "-relays-16-e5-f0" 3)
-     (relay-switch-fn "-relays-16-e5-f0" 4)
-     (relay-switch-fn "-relays-4-d-c-c5-f" 1)
-     (relay-switch-fn "-relays-4-d-c-c5-f" 2)
-     (relay-switch-fn "-relays-4-d-c-c5-f" 3)
-     (relay-switch-fn "-relays-4-d-c-c5-f" 4)
-     (relay-url-fn)
-     (relays-fn -relays-16-e5-f0
-                "http://192.168.178.37"
-                "ESP-16E5F0")
-     (relays-fn -relays-4-d-c-c5-f
-                "http://192.168.178.63"
-                "ESP-4DCC5F")
-     (lines-fn)
-     (range-fn)
-     (three-fn)
-     (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
-     (let ((dom-element (rx:doc-element "lines")))
-       (ps:chain renderer (set-size (* 0.75 (ps:@ window inner-width))
-                                    (* 0.75 (ps:@ window inner-height))))
-       ((ps:@ dom-element append-child)
-        (ps:chain renderer dom-element))))))
+      (ps:defvar *__ps_mv_reg*)
+      (alert-fn)
+      (rx:toggle-switch-fn)
+      (relay-switch-fn "-relays-16-e5-f0" 1)
+      (relay-switch-fn "-relays-16-e5-f0" 2)
+      (relay-switch-fn "-relays-16-e5-f0" 3)
+      (relay-switch-fn "-relays-16-e5-f0" 4)
+      (relay-switch-fn "-relays-4-d-c-c5-f" 1)
+      (relay-switch-fn "-relays-4-d-c-c5-f" 2)
+      (relay-switch-fn "-relays-4-d-c-c5-f" 3)
+      (relay-switch-fn "-relays-4-d-c-c5-f" 4)
+      (relay-url-fn)
+      (relays-fn -relays-16-e5-f0
+                 "http://192.168.178.37"
+                 "ESP-16E5F0")
+      (relays-fn -relays-4-d-c-c5-f
+                 "http://192.168.178.63"
+                 "ESP-4DCC5F")
+      (lines-fn)
+      (rx:range-fn)
+      (three-fn)
+      (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
+      (let ((dom-element (rx:doc-element "lines")))
+        (ps:chain renderer (set-size (ps:@ window inner-width)
+                                     (* 0.75 (ps:@ window inner-height))))
+        ((ps:@ dom-element append-child)
+         (ps:chain renderer dom-element))))))
 
 (defparameter *index*
   (sp:with-html-string

@@ -10,13 +10,14 @@
      (defvar *max_points* 50000)
      (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
      (defvar scene (ps:new (ps:chain -t-h-r-e-e (-scene))))
+     (defvar fov 45)
+     (defvar aspect (/ (ps:@ window inner-width)
+                       (ps:@ window inner-height)))
+     (defvar near 1)
+     (defvar far 1000)
      (defvar camera (ps:new (ps:chain
                              -t-h-r-e-e
-                             (-perspective-camera
-                              45
-                              (/ (ps:@ window inner-width)
-                                 (ps:@ window inner-height))
-                              1 1000))))
+                             (-perspective-camera fov aspect near far))))
      (defvar controls (ps:new (-orbit-controls
                                camera
                                (ps:@ renderer dom-element))))
@@ -82,16 +83,36 @@
      (animate)))
 
 (rx:defm lines-fn ()
-  `(defun -lines (props)
-       (rx:react-element :div
-                         (rx:{} id "lines"
-                                width (ps:@ window inner-width)
-                                height (ps:@ window inner-height) ))))
+  `(progn
+     (defun on-change-near (v)
+       ((ps:@ console log) v)
+       (when (> (ps:abs (- near v)) 1)
+         (setf (ps:@ camera near) v)
+         ((ps:@ camera update-projection-matrix))))
+     (defun on-change-far (v)
+       ((ps:@ console log) v)
+       (when (> (ps:abs (- far v)) 50)
+         (setf (ps:@ camera far) v)
+         ((ps:@ camera update-projection-matrix))))
+     (defun -lines (props)
+       (rx:div (rx:{} width (ps:@ window inner-width)
+                      height (ps:@ window inner-height))
+               (rx:div (rx:{} id "lines" key "lines"))
+               (rx:react-element -range
+                                 (rx:{} id "near"
+                                        key "near"
+                                        min 0
+                                        max 100
+                                        initial near
+                                        on-change on-change-near))
+               (rx:react-element -range
+                                 (rx:{} id "far"
+                                        key "far"
+                                        min 0
+                                        max 10000
+                                        initial far
+                                        on-change on-change-far))))))
 
-(rx:defm lines-tab ()
-  `(rx:react-bootstrap-tab* -tab
-                            (rx:{} event-key "lines" title "Lines")
-                            (rx:react-element -lines nil)))
 
 
 
