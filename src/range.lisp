@@ -27,17 +27,6 @@
            ((rx:@ props on-change) v)
            ((ps:@ console log) v)))
      (defun -range (props)
-       #|
-       (setf                            ; ;
-       (or (ps:@ props min) 0))         ; ;
-       (unless (rx:@ props max)         ; ;
-       (setf (ps:@ props max) 100))     ; ;
-       (unless (rx:@ props format-fn)   ; ;
-       (setf (ps:@ props format-fn)     ; ;
-       (lambda (n) (ps:chain n (to-fixed 0))))) ; ;
-       (unless (rx:@ props initial)     ; ;
-       (setf (ps:@ props initial) (format-fn (/ (- max min) 2)))) ; ;
-       |#
        (let* ((min@ (or (rx:@ props min) 0))
               (max@ (or (rx:@ props max) 100))
               (initial@ (or (rx:@ props initial) (/ (- max@ - min@) 2)))
@@ -75,7 +64,6 @@
                            (new-value (get-value new-percentage min@ max@)))
                       (handle-update new-value new-percentage)
                       (on-change props new-value)))))
-              
               (handle-mouse-down
                 (lambda (e)
                   (setf (ps:@ diff current)
@@ -88,12 +76,45 @@
                                                 handle-mouse-up))
                   (ps:chain document
                             (add-event-listener "mousemove"
-                                                handle-mouse-move)))))
-         
+                                                handle-mouse-move))))
+              (handle-touch-move
+                (lambda (e)
+                  (let ((new-x (- (ps:@ e touches 0 client-x)
+                                  (ps:@ diff current)
+                                  (ps:@ (ps:chain range-ref current
+                                                  (get-bounding-client-rect))
+                                        left)))
+                        (end (- (ps:@ range-ref current offset-width)
+                                (ps:@ thumb-ref current offset-width)))
+                        (start 0))
+                    (when (< new-x start) (setf new-x 0))
+                    (when (> new-x end) (setf new-x end))
+                    (let* ((new-percentage (get-percentage new-x start end))
+                           (new-value (get-value new-percentage min@ max@)))
+                      (handle-update new-value new-percentage)
+                      (on-change props new-value)))))
+              (handle-touch-start
+                (lambda (e)
+                  (setf (ps:@ diff current)
+                        (- (ps:@ e touches 0 client-x)
+                           (ps:@ (ps:chain thumb-ref current
+                                           (get-bounding-client-rect))
+                                 left)))
+                  (ps:chain document
+                            (add-event-listener "touchend"
+                                                handle-touch-end))
+                  (ps:chain document
+                            (add-event-listener "touchmove"
+                                                handle-touch-move)))))
          (rx:js "
 const handleMouseUp = () => {
     document.removeEventListener('mouseup', handleMouseUp);
     document.removeEventListener('mousemove', handleMouseMove);
+  };")
+         (rx:js "
+const handleTouchEnd = () => {
+    document.removeEventListener('touchend', handleTouchEnd);
+    document.removeEventListener('touchmove', handleTouchMove);
   };")
          (ps:chain -react
                    (use-layout-effect
@@ -111,7 +132,8 @@ const handleMouseUp = () => {
                                         ref range-progress-ref))
                          (rx-div (rx:{} class-name "styled-thumb"
                                         ref thumb-ref
-                                        on-mouse-down handle-mouse-down))))))))
+                                        on-mouse-down handle-mouse-down
+                                        on-touch-start handle-touch-start))))))))
 
 
 

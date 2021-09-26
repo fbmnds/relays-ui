@@ -27,6 +27,7 @@
     opacity: 0.5;
     background: #2f855a;
     cursor: pointer;
+    touch-action: pan-x;
 }
 
 
