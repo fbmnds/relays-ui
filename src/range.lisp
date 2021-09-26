@@ -17,20 +17,23 @@
        (rx:js "`calc(${percentage}% - 5px)`"))
      (defun get-width (percentage)
        (rx:js "`${percentage}%`"))
-     (defun format-fn (n)
-       (when (= (ps:typeof n) "number") (ps:chain n (to-fixed 0))))
+     (defun format-fn (props n)
+       (when (= (ps:typeof n) "number")
+         (if (rx:@ props format-fn)
+             ((rx:@ props format-fn) n)
+             (ps:chain n (to-fixed 0)))))
      (defun -range (props)
-#|
-       (setf 
-         (or (ps:@ props min) 0))
-       (unless (rx:@ props max)
-         (setf (ps:@ props max) 100))
-       (unless (rx:@ props format-fn)
-         (setf (ps:@ props format-fn)
-               (lambda (n) (ps:chain n (to-fixed 0)))))
-       (unless (rx:@ props initial)
-         (setf (ps:@ props initial) (format-fn (/ (- max min) 2))))
-|#
+       #|
+       (setf                            ; ;
+       (or (ps:@ props min) 0))         ; ;
+       (unless (rx:@ props max)         ; ;
+       (setf (ps:@ props max) 100))     ; ;
+       (unless (rx:@ props format-fn)   ; ;
+       (setf (ps:@ props format-fn)     ; ;
+       (lambda (n) (ps:chain n (to-fixed 0))))) ; ;
+       (unless (rx:@ props initial)     ; ;
+       (setf (ps:@ props initial) (format-fn (/ (- max min) 2)))) ; ;
+       |#
        (let* ((min@ (or (rx:@ props min) 0))
               (max@ (or (rx:@ props max) 100))
               (initial@ (or (rx:@ props initial) (/ (- max@ - min@) 2)))
@@ -49,9 +52,9 @@
                    (setf (ps:@ range-progress-ref current style width)
                          (get-width p))
                    (setf (ps:@ current-ref current text-content)
-                         (format-fn v))
+                         (format-fn props v))
                    nil)
-                  (ps:array (ps:@ props format-fn))))
+                 (ps:array (ps:@ props format-fn))))
               (handle-mouse-move
                 (lambda (e)
                   (let ((new-x (- (ps:@ e client-x)
@@ -68,14 +71,7 @@
                            (new-value (get-value new-percentage min@ max@)))
                       (handle-update new-value new-percentage)
                       ((ps:@ props on-change) new-value)))))
-              (handle-mouse-up
-                (lambda ()
-                  (ps:chain document
-                            (remove-event-listener "mouseup"
-                                                   handle-mouse-up))
-                  (ps:chain document
-                            (remove-event-listener "mousemove"
-                                                   handle-mouse-move))))
+              
               (handle-mouse-down
                 (lambda (e)
                   (setf (ps:@ diff current)
@@ -85,10 +81,10 @@
                                  left)))
                   (ps:chain document
                             (add-event-listener "mouseup"
-                                                 handle-mouse-up))
+                                                handle-mouse-up))
                   (ps:chain document
                             (add-event-listener "mousemove"
-                                                   handle-mouse-move)))))
+                                                handle-mouse-move)))))
          
          (rx:js "
 const handleMouseUp = () => {
@@ -101,11 +97,11 @@ const handleMouseUp = () => {
                     (ps:[] initial@ initial-percentage handle-update)))
          (rx-div nil
                  (rx-div (rx:{} class-name "range-header")
-                         (rx-div nil (format-fn min@))
+                         (rx-div nil (format-fn props min@))
                          (rx-div nil
                                  (rx-strong (rx:{} ref current-ref))
                                  " / "
-                                 (format-fn max@)))
+                                 (format-fn props max@)))
                  (rx-div (rx:{} class-name "styled-range" ref range-ref)
                          (rx-div (rx:{} class-name "styled-range-progress"
                                         ref range-progress-ref))
