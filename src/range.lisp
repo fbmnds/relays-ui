@@ -32,9 +32,10 @@
          (setf (ps:@ props initial) (format-fn (/ (- max min) 2))))
 |#
        (let* ((min@ (or (rx:@ props min) 0))
-              (max@ (or (rx:@ props max) 0))
+              (max@ (or (rx:@ props max) 100))
+              (initial@ (or (rx:@ props initial) (/ (- max@ - min@) 2)))
               (initial-percentage
-                (get-percentage (ps:@ props initial) min@ max@))
+                (get-percentage initial@ min@ max@))
               (range-ref ((ps:@ -react use-ref)))
               (range-progress-ref ((ps:@ -react use-ref)))
               (thumb-ref ((ps:@ -react use-ref)))
@@ -50,7 +51,7 @@
                    (setf (ps:@ current-ref current text-content)
                          (format-fn v))
                    nil)
-                 (ps:array (ps:@ props format-fn))))
+                  (ps:array (ps:@ props format-fn))))
               (handle-mouse-move
                 (lambda (e)
                   (let ((new-x (- (ps:@ e client-x)
@@ -94,11 +95,10 @@ const handleMouseUp = () => {
     document.removeEventListener('mouseup', handleMouseUp);
     document.removeEventListener('mousemove', handleMouseMove);
   };")
-
          (ps:chain -react
                    (use-layout-effect
-                    (lambda () (handle-update (ps:@ props initial) initial-percentage))
-                    (ps:array (ps:@ props initial) initial-percentage handle-update)))
+                    (lambda () (handle-update initial@ initial-percentage))
+                    (ps:[] initial@ initial-percentage handle-update)))
          (rx-div nil
                  (rx-div (rx:{} class-name "range-header")
                          (rx-div nil (format-fn min@))
