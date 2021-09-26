@@ -101,17 +101,11 @@ const handleMouseUp = () => {
     document.removeEventListener('mouseup', handleMouseUp);
     document.removeEventListener('mousemove', handleMouseMove);
   };")
-#|
+
          (ps:chain -react
                    (use-layout-effect
                     (lambda () (handle-update (ps:@ props initial) initial-percentage))
                     (ps:array (ps:@ props initial) initial-percentage handle-update)))
-         |#
-         (rx:js "
-React.useLayoutEffect(() => {
-    handleUpdate(props.initial, initialPercentage);
-  }, [props.initial, initialPercentage, handleUpdate])
-")
          (rx-div nil
                  (rx-div (rx:{} class-name "range-header")
                          (rx-div nil (format-fn (ps:@ props min)))
