@@ -32,10 +32,9 @@
          (setf (ps:@ props initial) (format-fn (/ (- max min) 2))))
 |#
        (let* ((min@ (or (rx:@ props min) 0))
+              (max@ (or (rx:@ props max) 0))
               (initial-percentage
-                (get-percentage (ps:@ props initial)
-                                min@
-                                (ps:@ props max)))
+                (get-percentage (ps:@ props initial) min@ max@))
               (range-ref ((ps:@ -react use-ref)))
               (range-progress-ref ((ps:@ -react use-ref)))
               (thumb-ref ((ps:@ -react use-ref)))
@@ -65,9 +64,7 @@
                     (when (< new-x start) (setf new-x 0))
                     (when (> new-x end) (setf new-x end))
                     (let* ((new-percentage (get-percentage new-x start end))
-                           (new-value (get-value new-percentage
-                                                 min@
-                                                 (ps:@ props max))))
+                           (new-value (get-value new-percentage min@ max@)))
                       (handle-update new-value new-percentage)
                       ((ps:@ props on-change) new-value)))))
               (handle-mouse-up
@@ -108,7 +105,7 @@ const handleMouseUp = () => {
                          (rx-div nil
                                  (rx-strong (rx:{} ref current-ref))
                                  " / "
-                                 (format-fn (ps:@ props max))))
+                                 (format-fn max@)))
                  (rx-div (rx:{} class-name "styled-range" ref range-ref)
                          (rx-div (rx:{} class-name "styled-range-progress"
                                         ref range-progress-ref))
