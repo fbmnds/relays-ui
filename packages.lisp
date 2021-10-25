@@ -11,6 +11,7 @@
                     (#:htm #:html-entities)
                     (#:uiop #:uiop))
   (:export #:clack-start
-           #:clack-stop))
+           #:clack-stop
+           #:export-spa))
 
 
