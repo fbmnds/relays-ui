@@ -36,7 +36,7 @@
   `(rx:js (format nil "function toggleRelay (relay_nr,url) { 
     relay_nr===1?setDisabled1(true):
     relay_nr===2?setDisabled2(true):
-   relay_nr===3?setDisabled3(true):
+    relay_nr===3?setDisabled3(true):
     relay_nr===4?setDisabled4(true):
     console.log('error relay_nr ' + relay_nr); 
     

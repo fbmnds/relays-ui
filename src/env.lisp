@@ -73,6 +73,9 @@
 (defparameter *favicon* (merge-pathnames #p"favicon.ico"
                                          (gethash :assets *paths*)))
 
+(defparameter *data* (merge-pathnames #p"relays-ui/assets/data.csv"
+                                      (gethash :projects *paths*)))
+
 (defparameter *clack-server* nil)
 
 (defun clack-start (handler)
