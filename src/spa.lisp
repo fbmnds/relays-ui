@@ -70,7 +70,9 @@
          (rx:route path "/css/bootstrap.css" 200 nil *bootstrap-css* t)
          (rx:route path "/js/bootstrap-bundle.js" 200 js-hdr *bootstrap-bundle-js*)
          (rx:route path "/assets/favicon.ico"
-                200 '(:content-type "image/x-icon") *favicon* t)
+                   200 '(:content-type "image/x-icon") *favicon* t)
+         (rx:route path "/assets/data.csv"
+                   200 '(:content-type "plain/text") *data* t)
          `(404 nil (,(format nil "Path not found~%"))))
       (t (e) (if *debug*
                  `(500 nil (,(format nil "Internal Server Error~%~A~%" e)))
@@ -99,6 +101,7 @@
     (write-spa "css/slider.css" *slider-css*)
     (write-spa "css/bootstrap.css" *bootstrap-css*)
     (write-spa "js/bootstrap-bundle.js" *bootstrap-bundle-js*)
-    (uiop:copy-file *favicon* (concatenate 'string path "assets/favicon.ico"))))
+    (uiop:copy-file *favicon* (concatenate 'string path "assets/favicon.ico"))
+    (uiop:copy-file *data* (concatenate 'string path "assets/data.csv"))))
 
 

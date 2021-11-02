@@ -1,5 +1,4 @@
 
-
 (in-package :relays-ui)
 
 
@@ -8,6 +7,7 @@
      (rx:js "import * as THREE from './three.module.js'")
      (rx:js "import { OrbitControls } from './OrbitControls.js'")
      (defvar *max_points* 50000)
+     (defvar *data_points* 5000)
      (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
      (defvar scene (ps:new (ps:chain -t-h-r-e-e (-scene))))
      (defvar fov 45)
@@ -37,10 +37,11 @@
        (ps:chain renderer (set-size (ps:@ window inner-width)
                                     (ps:@ window inner-height))))
      (defun update-positions ()
+       (setf *data_points* 5000)
        (let ((pos (ps:@ line geometry attributes position array))
              x y z)
-         (dotimes (i *max_points*)
-           (if (= (ps:% i 2500) 0)
+         (dotimes (i *data_points*)
+           (if (= (ps:rem i 2500) 0)
                (setf x 0 y 0 z 0)
                (setf x (+ x (* (- (ps:chain -math (random)) 0.5) 30))
                      y (+ y (* (- (ps:chain -math (random)) 0.5) 30))
@@ -48,6 +49,29 @@
            (setf (ps:@ pos (* 3 i)) x)
            (setf (ps:@ pos (+ (* 3 i) 1)) y)
            (setf (ps:@ pos (+ (* 3 i) 2)) z))))
+     (defun update-positions-from (data)
+       (let ((pos (ps:@ line geometry attributes position array)))
+         (dotimes (i (ps:@ data length))
+           (destructuring-bind (x y z) (ps:aref data i)
+             (setf (ps:@ pos (* 3 i)) (parse-float x))
+             (setf (ps:@ pos (+ (* 3 i) 1)) (parse-float y))
+             (setf (ps:@ pos (+ (* 3 i) 2)) (parse-float z))))))
+     (rx:js (format nil "
+function updateData () {
+    try {
+        fetch('~a')
+        .then(res => res.text())
+        .then(res => { var r = res.split('\\n'); 
+                       DATA_POINTS = r.length;  // not safe
+                       return r; })
+        .then(res => res.map(line => line.split(';')))
+        .then(res => updatePositionsFrom(res))
+    } catch (e) {
+        console.log('error updateData ' + e.toString());
+        updatePositions();
+        return null;
+    }
+}" "http://localhost:5000/assets/data.csv"))
      (defun init ()
        (ps:chain renderer (set-pixel-ratio (ps:@ window device-pixel-ratio)))
        (ps:chain renderer (set-size (ps:@ window inner-width)
@@ -65,17 +89,18 @@
        (ps:chain geometry (set-draw-range 0 draw-count))
        (ps:chain scene (add line))
        (ps:chain window (add-event-listener "resize" on-window-resize))
-       (update-positions))
+       (update-positions)
+       nil)
      (defun animate ()
        (request-animation-frame animate)
        (ps:chain controls (update))
-       (setf draw-count (ps:% (+ 1 draw-count) *max_points*))
+       (setf draw-count (ps:rem (+ 1 draw-count) *data_points*))
        (ps:chain line geometry (set-draw-range 0 draw-count))
        (when (= draw-count 0)
          ((ps:@ console log) "drawCount 0")
-         (update-positions)
+         (update-data)
          (setf (ps:@ line geometry attributes position needs-update) true))
-       (when (= 0 (ps:% (+ 1 draw-count) 500))
+       (when (= 0 (ps:rem (+ 1 draw-count) 500))
          (ps:chain line material color
                    (set-h-s-l (ps:chain -math (random)) 1 0.5)))
        (ps:chain renderer (render scene camera)))
@@ -97,6 +122,11 @@
      (defun -lines (props)
        (rx:div (rx:{} width (ps:@ window inner-width)
                       height (ps:@ window inner-height))
+               (rx:button (rx:{} id "data-btn"
+                                 key "data"
+                                 class-name "btn btn-primary btn-lg"
+                                 on-change update-data)
+                          "Refresh data")
                (rx:div (rx:{} id "lines" key "lines"))
                (rx:react-element -range
                                  (rx:{} id "near"
