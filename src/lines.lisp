@@ -28,6 +28,14 @@
                                                            linewidth 2)))))
      (defvar line (ps:new (ps:chain -t-h-r-e-e (-line geometry material))))
      (defvar draw-count 2)
+     (defvar *ac* (rx:{} from-idx 0
+                         to-idx 2
+                         upper-idx *data_points*
+                         tick-update t
+                         data-update ps:false
+                         mode :random-init
+                         timestamp (ps:chain -date (now))
+                         repeat t))
      (defun render ()
        (ps:chain renderer (render scene camera)))
      (defun on-window-resize ()
@@ -37,7 +45,6 @@
        (ps:chain renderer (set-size (ps:@ window inner-width)
                                     (ps:@ window inner-height))))
      (defun update-positions ()
-       (setf *data_points* 5000)
        (let ((pos (ps:@ line geometry attributes position array))
              x y z)
          (dotimes (i *data_points*)
@@ -55,7 +62,9 @@
            (destructuring-bind (x y z) (ps:aref data i)
              (setf (ps:@ pos (* 3 i)) (parse-float x))
              (setf (ps:@ pos (+ (* 3 i) 1)) (parse-float y))
-             (setf (ps:@ pos (+ (* 3 i) 2)) (parse-float z))))))
+             (setf (ps:@ pos (+ (* 3 i) 2)) (parse-float z)))))
+       (setf (ps:@ *ac* upper-idx) (ps:@ data length))
+       (setf (ps:@ *ac* data-update) t))
      (rx:js (format nil "
 function updateData () {
     try {
@@ -91,18 +100,47 @@ function updateData () {
        (ps:chain window (add-event-listener "resize" on-window-resize))
        (update-positions)
        nil)
+     (defun tick ()
+       (cond ((eql (ps:@ *ac* mode) :random-init)
+              (setf (ps:@ *ac* tick-update) t)
+              (setf (ps:@ *ac* from-idx) 0)
+              (setf (ps:@ *ac* to-idx) 2)
+              (setf (ps:@ *ac* data-update) t)
+              (setf (ps:@ *ac* tick-update) t)
+              (update-positions)
+              (setf (ps:@ *ac* mode) :random))
+             ((eql (ps:@ *ac* mode) :random)
+              (setf (ps:@ *ac* to-idx) (1+ (ps:@ *ac* to-idx)))
+              (when (and (ps:@ *ac* repeat)
+                       (= 0 (ps:rem (ps:@ *ac* to-idx) *data_points*)))
+                  (update-positions)
+                    (setf (ps:@ *ac* data-update) t)
+                    (setf (ps:@ *ac* to-idx) 2)))
+             ((eql (ps:@ *ac* mode) :csv-init)
+              (setf (ps:@ *ac* timestamp) (ps:chain -date (now)))
+              (setf (ps:@ *ac* from-idx) 0)
+              (setf (ps:@ *ac* to-idx) 2)
+              (update-data)
+              (setf (ps:@ *ac* mode) :csv-tock))
+             ((eql (ps:@ *ac* mode) :csv-tick)
+              (when (> (ps:chain -date (now))
+                       (+ (ps:@ *ac* timestamp) 3000))
+                (setf (ps:@ *ac* timestamp) (ps:chain -date (now)))
+                (setf (ps:@ *ac* tick-update) t)
+                (setf (ps:@ *ac* mode) :csv-tock)))
+             ((eql (ps:@ *ac* mode) :csv-tock)
+              (setf (ps:@ *ac* timestamp) (ps:chain -date (now)))
+              (setf (ps:@ *ac* tick-update) ps:false))))
      (defun animate ()
        (request-animation-frame animate)
        (ps:chain controls (update))
-       (setf draw-count (ps:rem (+ 1 draw-count) *data_points*))
-       (ps:chain line geometry (set-draw-range 0 draw-count))
-       (when (= draw-count 0)
-         ((ps:@ console log) "drawCount 0")
-         (update-data)
-         (setf (ps:@ line geometry attributes position needs-update) true))
-       (when (= 0 (ps:rem (+ 1 draw-count) 500))
-         (ps:chain line material color
-                   (set-h-s-l (ps:chain -math (random)) 1 0.5)))
+       (tick)
+       (when (ps:@ *ac* tick-update)
+         (when (ps:@ *ac* data-update)
+           (setf (ps:@ line geometry attributes position needs-update) true))
+         (when (= 0 (ps:rem (ps:@ *ac* ) 500))
+           (ps:chain line material color
+                     (set-h-s-l (ps:chain -math (random)) 1 0.5))))
        (ps:chain renderer (render scene camera)))
      (init)
      (animate)))
@@ -122,11 +160,16 @@ function updateData () {
      (defun -lines (props)
        (rx:div (rx:{} width (ps:@ window inner-width)
                       height (ps:@ window inner-height))
-               (rx:button (rx:{} id "data-btn"
-                                 key "data"
+               (rx:button (rx:{} id "csv-data-btn"
+                                 key "csv-data"
                                  class-name "btn btn-primary btn-lg"
-                                 on-change update-data)
-                          "Refresh data")
+                                 on-click update-data)
+                          "Load CSV data")
+               (rx:button (rx:{} id "random-data-btn"
+                                 key "random-data"
+                                 class-name "btn btn-primary btn-lg"
+                                 on-click update-data)
+                          "Random data")
                (rx:div (rx:{} id "lines" key "lines"))
                (rx:react-element -range
                                  (rx:{} id "near"
