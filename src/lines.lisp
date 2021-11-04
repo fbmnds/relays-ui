@@ -55,7 +55,9 @@
                      z (+ z (* (- (ps:chain -math (random)) 0.5) 30))))
            (setf (ps:@ pos (* 3 i)) x)
            (setf (ps:@ pos (+ (* 3 i) 1)) y)
-           (setf (ps:@ pos (+ (* 3 i) 2)) z))))
+           (setf (ps:@ pos (+ (* 3 i) 2)) z)))
+       (setf (ps:@ *ac* upper-idx) *data_points*)
+       (setf (ps:@ *ac* data-update) t))
      (defun update-positions-from (data)
        (let ((pos (ps:@ line geometry attributes position array)))
          (dotimes (i (ps:@ data length))
@@ -112,10 +114,10 @@ function updateData () {
              ((eql (ps:@ *ac* mode) :random)
               (setf (ps:@ *ac* to-idx) (1+ (ps:@ *ac* to-idx)))
               (when (and (ps:@ *ac* repeat)
-                       (= 0 (ps:rem (ps:@ *ac* to-idx) *data_points*)))
-                  (update-positions)
-                    (setf (ps:@ *ac* data-update) t)
-                    (setf (ps:@ *ac* to-idx) 2)))
+                         (= 0 (ps:rem (ps:@ *ac* to-idx) *data_points*)))
+                (update-positions)
+                (setf (ps:@ *ac* data-update) t)
+                (setf (ps:@ *ac* to-idx) 2)))
              ((eql (ps:@ *ac* mode) :csv-init)
               (setf (ps:@ *ac* timestamp) (ps:chain -date (now)))
               (setf (ps:@ *ac* from-idx) 0)
@@ -123,22 +125,23 @@ function updateData () {
               (update-data)
               (setf (ps:@ *ac* mode) :csv-tock))
              ((eql (ps:@ *ac* mode) :csv-tick)
-              (when (> (ps:chain -date (now))
-                       (+ (ps:@ *ac* timestamp) 3000))
-                (setf (ps:@ *ac* timestamp) (ps:chain -date (now)))
+              (when (> (ps:chain -date (now)) (ps:@ *ac* timestamp))
+                (setf (ps:@ *ac* to-idx) (1+ (ps:@ *ac* to-idx)))
                 (setf (ps:@ *ac* tick-update) t)
                 (setf (ps:@ *ac* mode) :csv-tock)))
              ((eql (ps:@ *ac* mode) :csv-tock)
-              (setf (ps:@ *ac* timestamp) (ps:chain -date (now)))
-              (setf (ps:@ *ac* tick-update) ps:false))))
+              (setf (ps:@ *ac* timestamp) (+ (ps:chain -date (now)) 3000))
+              (setf (ps:@ *ac* tick-update) ps:false)
+              (setf (ps:@ *ac* mode) :csv-tick))))
      (defun animate ()
        (request-animation-frame animate)
        (ps:chain controls (update))
-       (tick)
+       ;;(tick)
        (when (ps:@ *ac* tick-update)
          (when (ps:@ *ac* data-update)
-           (setf (ps:@ line geometry attributes position needs-update) true))
-         (when (= 0 (ps:rem (ps:@ *ac* ) 500))
+           (setf (ps:@ line geometry attributes position needs-update) t)
+           (setf (ps:@ *ac* data-update) ps:false))
+         (when (= 0 (ps:rem (ps:@ *ac* to-idx) 500))
            (ps:chain line material color
                      (set-h-s-l (ps:chain -math (random)) 1 0.5))))
        (ps:chain renderer (render scene camera)))
@@ -158,19 +161,23 @@ function updateData () {
          (setf (ps:@ camera far) v)
          ((ps:@ camera update-projection-matrix))))
      (defun -lines (props)
+       (defun on-change-random ()
+         (setf (ps:@ *ac* mode) :random-init))
+       (defun on-change-csv ()
+         (setf (ps:@ *ac* mode) :csv-init))
        (rx:div (rx:{} width (ps:@ window inner-width)
                       height (ps:@ window inner-height))
+               (rx:div (rx:{} id "lines" key "lines"))
                (rx:button (rx:{} id "csv-data-btn"
                                  key "csv-data"
                                  class-name "btn btn-primary btn-lg"
-                                 on-click update-data)
+                                 on-change on-change-csv)
                           "Load CSV data")
                (rx:button (rx:{} id "random-data-btn"
                                  key "random-data"
                                  class-name "btn btn-primary btn-lg"
-                                 on-click update-data)
+                                 on-change on-change-random)
                           "Random data")
-               (rx:div (rx:{} id "lines" key "lines"))
                (rx:react-element -range
                                  (rx:{} id "near"
                                         key "near"
@@ -185,7 +192,5 @@ function updateData () {
                                         max 10000
                                         initial far
                                         on-change on-change-far))))))
-
-
 
 
