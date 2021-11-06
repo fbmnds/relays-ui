@@ -8,18 +8,18 @@
    setDisabled4(false);")
 
 (rx:defm status-relay-fn (ts)
-  `(progn
-     
-     (rx:js (format nil "
-    var ~a = Date.now() - 5500;
+  (let ((set-ts (concatenate 'string "set" (string-capitalize ts))))
+    `(progn
+       (rx:js (format nil "
     function statusRelay (url) {
     try {
-        if (Date.now() < ~a + 5000) return;
+        if (Date.now() < ~a + 3000) return;
+        if (~a_Fetch) return;
+        ~a_Fetch(true);
         setDisabled1(true);
         setDisabled2(true);
         setDisabled3(true);
         setDisabled4(true);       
-        ~a = (Date.now());
         fetch(url + '/?', { method: 'GET',
                             headers: { 'Accept': 'application/json' }
                           })
@@ -39,19 +39,27 @@
               if (!relay3 && state.r3===1) setRelay3(true);
               if (relay4 && state.r4===0) setRelay4(false);
               if (!relay4 && state.r4===1) setRelay4(true);
+              ~a_Fetch(false);
+              ~a(Date.now());
               ~a
         })
         .catch(e => {
-              console.error(e); 
+              console.error(e);
+              ~a(Date.now());
+              ~a_Fetch(false);
               ~a
         })
     } catch (e) {
         console.error(e);
+        ~a(Date.now());
+        ~a_Fetch(false);
         ~a
     }
     return null;
-}" ,ts ,ts ,ts
-   *set-disabled-false* *set-disabled-false* *set-disabled-false*))))
+}" ,ts ,ts ,set-ts
+   ,set-ts ,set-ts *set-disabled-false*
+   ,set-ts ,set-ts *set-disabled-false*
+   ,set-ts ,set-ts *set-disabled-false*)))))
 
 (rx:defm toggle-relay-fn ()
   `(rx:js (format nil "function toggleRelay (relay_nr,url) { 
@@ -134,9 +142,12 @@
          (fname1 (make-symbol (format nil "~a-1" fn-)))
          (fname2 (make-symbol (format nil "~a-2" fn-)))
          (fname3 (make-symbol (format nil "~a-3" fn-)))
-         (fname4 (make-symbol (format nil "~a-4" fn-))))
+         (fname4 (make-symbol (format nil "~a-4" fn-)))
+         (ts (make-symbol timestamp))
+         (ts-fetch (make-symbol (format nil "~a_Fetch" timestamp)))
+         (ts-timer (make-symbol (format nil "~a_Timer" timestamp))))
     `(progn
-       
+       (defvar ,ts-timer t)
        (defun ,fname (props)
          (defvar url ,url)
          (rx:use-state "relay1" 'false)
@@ -147,13 +158,14 @@
          (rx:use-state "disabled2" 'false)
          (rx:use-state "disabled3" 'false)
          (rx:use-state "disabled4" 'false)
-         (toggle-relay-fn)
+         (rx:use-state ,ts-fetch 'false)
+         (rx:use-state ,timestamp 0)
          (status-relay-fn ,timestamp)
          (defun ,fn-timer () (status-relay ,url))
-         (set-interval ,fn-timer 60000)
-         (rx:tlambda () (status-relay url))
-         (rx:js "React.useEffect(() => 
-                 { statusRelay(url); }, []);")
+         (when ,ts-timer
+           (set-interval ,fn-timer 60000)
+           (setf ,ts-timer ps:false))
+         (toggle-relay-fn)
          (rx:react-element
           :div nil
           (rx:react-element ,fname1
