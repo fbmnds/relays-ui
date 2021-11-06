@@ -143,7 +143,6 @@
          (fname2 (make-symbol (format nil "~a-2" fn-)))
          (fname3 (make-symbol (format nil "~a-3" fn-)))
          (fname4 (make-symbol (format nil "~a-4" fn-)))
-         (ts (make-symbol timestamp))
          (ts-fetch (make-symbol (format nil "~a_Fetch" timestamp)))
          (ts-timer (make-symbol (format nil "~a_Timer" timestamp))))
     `(progn
@@ -166,6 +165,7 @@
            (set-interval ,fn-timer 60000)
            (setf ,ts-timer ps:false))
          (toggle-relay-fn)
+         (rx:js "React.useEffect(() => { statusRelay(url); }, []);")
          (rx:react-element
           :div nil
           (rx:react-element ,fname1
