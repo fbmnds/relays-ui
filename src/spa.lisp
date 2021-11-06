@@ -19,10 +19,12 @@
       (relay-url-fn)
       (relays-fn -relays-16-e5-f0
                  "http://192.168.178.37"
-                 "ESP-16E5F0")
+                 "ESP-16E5F0"
+                 "ts_16E5F0")
       (relays-fn -relays-4-d-c-c5-f
                  "http://192.168.178.63"
-                 "ESP-4DCC5F")
+                 "ESP-4DCC5F"
+                 "ts_4DCC5F")
       (lines-fn)
       (rx:range-fn)
       (three-fn)
@@ -56,7 +58,8 @@
         (path (getf env :path-info)))
     (handler-case
         (or
-         (rx:route path "/index.html" 200 nil *index*)
+         (rx:route path "/index.html"
+                   200 '(:access-control-allow-origin "*") *index*)
          (rx:route path "/js/react.js" 200 js-hdr *react*)
          (rx:route path "/js/react-dom.js" 200 js-hdr *react-dom*)
          (rx:route path "/js/react-bootstrap.js" 200 js-hdr *react-bootstrap*)
