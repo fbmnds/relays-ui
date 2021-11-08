@@ -143,7 +143,7 @@ function updateData () {
                                                           (ps:@ *ac* to-idx)))
                   (setf (ps:@ *ac* mode) :csv-tock))))
              ((eql (ps:@ *ac* mode) :csv-tock)
-              (setf (ps:@ *ac* timestamp) (+ (ps:chain -date (now)) 3000))
+              (setf (ps:@ *ac* timestamp) (+ (ps:chain -date (now)) 1000))
               (setf (ps:@ *ac* tick-update) ps:false)
               (setf (ps:@ *ac* mode) :csv-tick))
              (t nil)))
