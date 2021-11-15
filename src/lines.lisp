@@ -115,7 +115,7 @@ function updateData () {
              ((eql (ps:@ *ac* mode) :random)
               (setf (ps:@ *ac* to-idx) (1+ (ps:@ *ac* to-idx)))
               (when (and (ps:@ *ac* repeat)
-                         (=  (ps:@ *ac* to-idx) (ps:@ *ac* uper-idx-idx)))
+                         (=  (ps:@ *ac* to-idx) (ps:@ *ac* uper-idx)))
                 (update-positions)
                 (setf (ps:@ *ac* data-update) t)
                 (setf (ps:@ *ac* to-idx) 2))
@@ -165,12 +165,11 @@ function updateData () {
 (rx:defm lines-fn ()
   `(progn
      (defun on-change-near (v)
-       ((ps:@ console log) v)
        (when (> (ps:abs (- near v)) 1)
          (setf (ps:@ camera near) v)
          ((ps:@ camera update-projection-matrix))))
      (defun on-change-far (v)
-       ((ps:@ console log) v)
+       ;;((ps:@ console log) v)
        (when (> (ps:abs (- far v)) 50)
          (setf (ps:@ camera far) v)
          ((ps:@ camera update-projection-matrix))))
@@ -179,6 +178,10 @@ function updateData () {
      (defun on-change-csv ()
        (setf (ps:@ *ac* mode) :csv-init))
      (defun -lines (props)
+       (rx:use-state "upper" 1000)
+       (defun on-change-to-idx (v)
+         (setf (ps:@ *ac* to-idx) v)
+         (set-upper (ps:@ *ac* upper-idx)))
        (rx:div (rx:{} width (ps:@ window inner-width)
                       height (ps:@ window inner-height))
                (rx:button (rx:{} id "csv-data-btn"
@@ -192,6 +195,13 @@ function updateData () {
                                  on-click on-change-random)
                           "Random data")
                (rx:div (rx:{} id "lines" key "lines"))
+               (rx:react-element -range
+                                 (rx:{} id "to-idx"
+                                        key "to-idx"
+                                        min 2
+                                        max upper
+                                        initial 2
+                                        on-change on-change-to-idx))
                (rx:react-element -range
                                  (rx:{} id "near"
                                         key "near"
