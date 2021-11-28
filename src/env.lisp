@@ -67,7 +67,7 @@
                                           (gethash :three *paths*))))
 
 (defparameter *orbit-controls*
-  (uiop:read-file-string (merge-pathnames #p"jsm/controls/OrbitControls.js"
+  (uiop:read-file-string (merge-pathnames #p"js/controls/OrbitControls.js"
                                           (gethash :three-examples *paths*))))
 
 (defparameter *favicon* (merge-pathnames #p"favicon.ico"
