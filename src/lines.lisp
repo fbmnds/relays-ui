@@ -4,8 +4,8 @@
 
 (rx:defm three-fn ()
   `(progn
-     (rx:js "import * as THREE from './three.module.js'")
-     (rx:js "import { OrbitControls } from './OrbitControls.js'")
+     ;;(rx:js "import * as THREE from './three.module.js'")
+     ;;(rx:js "import { OrbitControls } from './OrbitControls.js'")
      (defvar *max_points* 50000)
      (defvar *data_points* 5000)
      (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
@@ -18,9 +18,11 @@
      (defvar camera (ps:new (ps:chain
                              -t-h-r-e-e
                              (-perspective-camera fov aspect near far))))
-     (defvar controls (ps:new (-orbit-controls
-                               camera
-                               (ps:@ renderer dom-element))))
+     (defvar controls (ps:new (ps:chain
+                               -t-h-r-e-e
+                               (-orbit-controls
+                                camera
+                                (ps:@ renderer dom-element)))))
      (defvar geometry (ps:new (ps:chain -t-h-r-e-e (-buffer-geometry))))
      (defvar positions (ps:new (-float32-array (* 3 *max_points*))))
      (defvar material (ps:new (ps:chain -t-h-r-e-e (-line-basic-material
@@ -128,7 +130,7 @@ function updateData () {
               (setf (ps:@ *ac* repeat) ps:false)
               (update-data)
               (ps:chain line geometry (set-draw-range (ps:@ *ac* from-idx)
-                                                          (ps:@ *ac* to-idx)))
+                                                      (ps:@ *ac* to-idx)))
               (setf (ps:@ *ac* mode) :csv-tock))
              ((eql (ps:@ *ac* mode) :csv-tick)
               (when (> (ps:chain -date (now)) (ps:@ *ac* timestamp))
