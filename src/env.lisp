@@ -26,6 +26,9 @@
 (setf (gethash :three-examples *paths*)
       (merge-pathnames #p"js-libs/three.0.127.0/examples/"
                        (gethash :projects *paths*)))
+(setf (gethash :clog *paths*)
+      (merge-pathnames #p"clog/"
+                       (gethash :projects *paths*)))
 
 (defparameter *react*
   (uiop:read-file-string (merge-pathnames #p"react.17.0.2.js"
@@ -34,7 +37,6 @@
 (defparameter *react-dom*
   (uiop:read-file-string (merge-pathnames #p"react-dom.17.0.2.js"
                                           (gethash :reactjs *paths*))))
-
 
 (defparameter *base-css* nil)
 
@@ -75,6 +77,12 @@
 
 (defparameter *data* (merge-pathnames #p"relays-ui/assets/data.csv"
                                       (gethash :projects *paths*)))
+
+(defparameter *clog-js* (merge-pathnames #p"static-files/js/"
+                                         (gethash :clog *paths*)))
+
+(defparameter *clog-css* (merge-pathnames #p"static-files/css/"
+                                          (gethash :clog *paths*)))
 
 (defparameter *clack-server* nil)
 

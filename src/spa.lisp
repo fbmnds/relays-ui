@@ -55,6 +55,40 @@
       (:div :id "relays")
       (:script :type "module" :src "/js/App.js")))))
 
+(defparameter *boot*
+  (sp:with-html-string
+    (:doctype)
+    (:html
+     (:head
+      (:meta :http-equiv "Cache-Control" :content "no-cache, no-store, must-revalidate")
+      (:meta :http-equiv "Pragma" :content "no-cache")
+      (:meta :http-equiv "Expires" :content "0")
+      ;;(:meta :charset "utf-8")
+      (:meta :name "viewport" :content "width=device-width, initial-scale=1")
+
+      (:script :type "text/javascript" :src "/js/jquery.min.js")
+      (:script "var clog_debug = true;")
+      (:script :type "text/javascript" :src "/js/boot.js")
+      
+      (:link :rel "stylesheet" :href "/css/bootstrap.css")
+      (:link :rel "stylesheet" :href "/css/slider.css")
+      (:link :rel "stylesheet" :href "/css/toggle-switch.css")
+      (:link :rel "icon" :href "/assets/favicon.ico")
+
+      (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
+      (:script :type "application/javascript" :src "/js/react.js")
+      (:script :type "application/javascript" :src "/js/react-dom.js")
+      (:script :type "application/javascript" :src "/js/react-bootstrap.js")
+      (:script :type "application/javascript" :src "/js/three.js")
+      (:script :type "application/javascript" :src "/js/OrbitControls.js"))
+     (:body "Javascript must be enabled."))))
+
+(defparameter *body*
+  (sp:with-html-string
+    (:body
+      (:div :id "relays")
+      (:script :type "module" :src "/js/App.js"))))
+
 (defun handler (env)
   (let ((js-hdr '(:content-type "application/javascript"))
         (path (getf env :path-info)))
@@ -84,8 +118,11 @@
                  `(500 nil (,(format nil "Internal Server Error~%~A~%" e)))
                  `(500 nil (,(format nil "Internal Server Error"))))))))
 
-(defun export-spa (path)
-  (uiop:delete-directory-tree (make-pathname :directory path)
+(defun export-spa (path &rest args)
+  (let ((path (if (eq #\/ (elt path (1- (length path))))
+                  path
+                  (concatenate 'string path "/"))))
+    (uiop:delete-directory-tree (make-pathname :directory path)
                               :validate (y-or-n-p "delete '~a'?(y/n) " path)
                               :if-does-not-exist :ignore)
   (ensure-directories-exist (concatenate 'string path "js/"))
@@ -95,12 +132,22 @@
            (a:write-string-into-file content (concatenate 'string path file)
                                      :if-exists :supersede
                                      :if-does-not-exist :create)))
-    (write-spa "index.html" *index*)
+    (if (member :clog args)
+        (progn
+          (write-spa "boot.html" *boot*)
+          (uiop:copy-file (merge-pathnames #p"boot.js" *clog-js*)
+                          (concatenate 'string path "js/boot.js"))
+          (uiop:copy-file (merge-pathnames #p"jquery-ui.js" *clog-js*)
+                          (concatenate 'string path "js/jquery-ui.js"))
+          (uiop:copy-file (merge-pathnames #p"jquery.min.js" *clog-js*)
+                          (concatenate 'string path "js/jquery.min.js"))
+          (uiop:copy-file (merge-pathnames #p"jquery-ui.css" *clog-css*)
+                          (concatenate 'string path "css/jquery-ui.css")))
+        (write-spa "index.html" *index*))
     (write-spa "js/react.js" *react*)
     (write-spa "js/react-dom.js" *react-dom*)
     (write-spa "js/react-bootstrap.js" *react-bootstrap*)
     (write-spa "js/three.js" *three*)
-    ;;(write-spa "js/three.module.js" *three-module*)
     (write-spa "js/OrbitControls.js" *orbit-controls*)
     (write-spa "js/App.js" *app-js*)
     (write-spa "css/toggle-switch.css" *toggle-switch-css*)
@@ -108,6 +155,8 @@
     (write-spa "css/bootstrap.css" *bootstrap-css*)
     (write-spa "js/bootstrap-bundle.js" *bootstrap-bundle-js*)
     (uiop:copy-file *favicon* (concatenate 'string path "assets/favicon.ico"))
-    (uiop:copy-file *data* (concatenate 'string path "assets/data.csv"))))
+    (uiop:copy-file *data* (concatenate 'string path "assets/data.csv")))))
+
+
 
 
