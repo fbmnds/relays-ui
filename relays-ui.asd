@@ -18,7 +18,8 @@
    #:woo
    #:optima
    #:alexandria
-   #:uiop)
+   #:uiop
+   #:clog)
   :components
   ((:file "packages")
    ;;(:file "psx")
