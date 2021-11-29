@@ -73,7 +73,7 @@
       (:link :rel "stylesheet" :href "/css/bootstrap.css")
       (:link :rel "stylesheet" :href "/css/slider.css")
       (:link :rel "stylesheet" :href "/css/toggle-switch.css")
-      (:link :rel "icon" :href "/assets/favicon.ico")
+      ;;(:link :rel "icon" :href "/assets/favicon.ico")
 
       (:script :type "application/javascript" :src "/js/bootstrap-bundle.js")
       (:script :type "application/javascript" :src "/js/react.js")
@@ -85,9 +85,9 @@
 
 (defparameter *body*
   (sp:with-html-string
-    (:body
+    (:div
       (:div :id "relays")
-      (:script :type "module" :src "/js/App.js"))))
+      (:script :type "application/javascript" :src "/js/App.js"))))
 
 (defun handler (env)
   (let ((js-hdr '(:content-type "application/javascript"))
@@ -142,7 +142,9 @@
                           (concatenate 'string path "js/jquery.min.js"))
           (uiop:copy-file (merge-pathnames #p"jquery-ui.css" *clog-css*)
                           (concatenate 'string path "css/jquery-ui.css")))
-        (write-spa "index.html" *index*))
+        (progn
+          (write-spa "index.html" *index*)
+          (uiop:copy-file *favicon* (concatenate 'string path "assets/favicon.ico"))))
     (write-spa "js/react.js" *react*)
     (write-spa "js/react-dom.js" *react-dom*)
     (write-spa "js/react-bootstrap.js" *react-bootstrap*)
@@ -153,8 +155,29 @@
     (write-spa "css/slider.css" *slider-css*)
     (write-spa "css/bootstrap.css" *bootstrap-css*)
     (write-spa "js/bootstrap-bundle.js" *bootstrap-bundle-js*)
-    (uiop:copy-file *favicon* (concatenate 'string path "assets/favicon.ico"))
     (uiop:copy-file *data* (concatenate 'string path "assets/data.csv")))))
+
+;; Define our CLOG application
+(defun on-new-window (body)
+  (clog:create-child body *body*)
+  (clog:run body)) ; Keep our thread alive until connection closes
+                   ; and prevent garbage collection of our CLOG-Objects
+                   ; until no longer needed.
+
+(defun start-app ()
+  "Start application."
+  ;; Initialize the CLOG system
+  (clog:initialize #'on-new-window
+                   :port 8000
+                   :static-root *clog-static-root*
+                   :static-boot-js t)
+  ;; Set the function on-new-window to execute
+  ;; every time a browser connection to our app.
+  ;; #' tells Common Lisp to pass the function
+  ;; to intialize and not to execute it.
+
+  ;; Open a browser
+  (clog:open-browser :url "http://localhost:8000"))
 
 
 
