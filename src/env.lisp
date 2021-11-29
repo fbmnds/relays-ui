@@ -84,6 +84,9 @@
 (defparameter *clog-css* (merge-pathnames #p"static-files/css/"
                                           (gethash :clog *paths*)))
 
+(defparameter *clog-static-root* (merge-pathnames #p"relays-ui/static-files/"
+                                          (gethash :projects *paths*)))
+
 (defparameter *clack-server* nil)
 
 (defun clack-start (handler)

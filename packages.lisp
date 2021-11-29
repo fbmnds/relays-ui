@@ -9,9 +9,11 @@
                     (#:rx #:rx)
                     (#:sp #:spinneret)
                     (#:htm #:html-entities)
-                    (#:uiop #:uiop))
+                    (#:uiop #:uiop)
+                    (#:clog #:clog))
   (:export #:clack-start
            #:clack-stop
-           #:export-spa))
+           #:export-spa
+           #:start-app))
 
 

@@ -4,6 +4,7 @@
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
 www/
+static-files/
 
 # Node artifact files
 node_modules/
