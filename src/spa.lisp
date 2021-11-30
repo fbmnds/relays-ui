@@ -2,7 +2,7 @@
 (in-package #:relays-ui)
 
 
-(defparameter *app-js*
+(defun app-js (&optional (port 5000))
   (ps:ps*
    `(progn
       (ps:defvar *__ps_mv_reg*)
@@ -27,7 +27,7 @@
                  "ts_4dcc5f")
       (lines-fn)
       (rx:range-fn)
-      (three-fn)
+      (three-fn ,port)
       (tabs "-relays-16-e5-f0" "relays-tab" "mb-3" "relays")
       (let ((dom-element (rx:doc-element "lines")))
         (ps:chain renderer (set-size (ps:@ window inner-width)
@@ -103,7 +103,7 @@
          ;;(rx:route path "/js/three.module.js" 200 js-hdr *three-module*)
          ;;(rx:route path "/build/three.module.js" 200 js-hdr *three-module*)
          (rx:route path "/js/OrbitControls.js" 200 js-hdr *orbit-controls*)
-         (rx:route path "/js/App.js" 200 js-hdr *app-js*)
+         (rx:route path "/js/App.js" 200 js-hdr (app-js))
          (rx:route path "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)
          (rx:route path "/css/slider.css" 200 nil *slider-css* t)
          (rx:route path "/css/bootstrap.css" 200 nil *bootstrap-css* t)
@@ -134,6 +134,7 @@
     (if (member :clog args)
         (progn
           (write-spa "boot.html" *boot*)
+          (write-spa "js/App.js" (app-js 8000))
           (uiop:copy-file (merge-pathnames #p"boot.js" *clog-js*)
                           (concatenate 'string path "js/boot.js"))
           (uiop:copy-file (merge-pathnames #p"jquery-ui.js" *clog-js*)
@@ -144,13 +145,13 @@
                           (concatenate 'string path "css/jquery-ui.css")))
         (progn
           (write-spa "index.html" *index*)
+          (write-spa "js/App.js" (app-js))
           (uiop:copy-file *favicon* (concatenate 'string path "assets/favicon.ico"))))
     (write-spa "js/react.js" *react*)
     (write-spa "js/react-dom.js" *react-dom*)
     (write-spa "js/react-bootstrap.js" *react-bootstrap*)
     (write-spa "js/three.js" *three*)
     (write-spa "js/OrbitControls.js" *orbit-controls*)
-    (write-spa "js/App.js" *app-js*)
     (write-spa "css/toggle-switch.css" *toggle-switch-css*)
     (write-spa "css/slider.css" *slider-css*)
     (write-spa "css/bootstrap.css" *bootstrap-css*)
