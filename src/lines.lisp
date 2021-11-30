@@ -2,7 +2,7 @@
 (in-package :relays-ui)
 
 
-(rx:defm three-fn ()
+(rx:defm three-fn (port)
   `(progn
      ;;(rx:js "import * as THREE from './three.module.js'")
      ;;(rx:js "import { OrbitControls } from './OrbitControls.js'")
@@ -84,7 +84,7 @@ function updateData () {
         updatePositions();
         return null;
     }
-}" "http://localhost:5000/assets/data.csv"))
+}" (format nil "http://localhost:~a/assets/data.csv" ,port)))
      (defun init ()
        (ps:chain renderer (set-pixel-ratio (ps:@ window device-pixel-ratio)))
        (ps:chain renderer (set-size (ps:@ window inner-width)
