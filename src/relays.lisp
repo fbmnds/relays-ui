@@ -140,6 +140,7 @@
   (let* ((fn- (symbol-name fname))
          (fn-timer (make-symbol (format nil "~a-timer" fn-)))
          (fname1 (make-symbol (format nil "~a-1" fn-)))
+         (fname1-toggle (make-symbol (format nil "~a-1-toggle" fn-)))
          (fname2 (make-symbol (format nil "~a-2" fn-)))
          (fname3 (make-symbol (format nil "~a-3" fn-)))
          (fname4 (make-symbol (format nil "~a-4" fn-)))
@@ -147,6 +148,7 @@
          (ts-timer (make-symbol (format nil "~a_Timer" timestamp))))
     `(progn
        (defvar ,ts-timer t)
+       (defvar ,fname1-toggle)
        (defun ,fname (props)
          (defvar url ,url)
          (rx:use-state "relay1" 'false)
@@ -166,6 +168,7 @@
            (setf ,ts-timer ps:false))
          (toggle-relay-fn)
          (rx:js "React.useEffect(() => { statusRelay(url); }, []);")
+         (setf ,fname1-toggle (rx:tlambda () (set-disabled1 (not disabled1))))
          (rx:react-element
           :div nil
           (rx:react-element ,fname1
