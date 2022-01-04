@@ -1,11 +1,9 @@
 
 (in-package :relays-ui)
 
-
-(rx:defm three-fn (port)
+(rx:defm three-globals-fn ()
   `(progn
      (defvar *max_points* 50000)
-     (defvar *data_points* 5000)
      (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
      (defvar scene (ps:new (ps:chain -t-h-r-e-e (-scene))))
      (defvar fov 90)
@@ -29,12 +27,15 @@
      (defvar line (ps:new (ps:chain -t-h-r-e-e (-line geometry material))))
      (defvar *ac* (rx:{} from-idx 0
                          to-idx 2
-                         upper-idx *data_points*
+                         upper-idx 5000
                          tick-update t
                          data-update ps:false
                          mode :random-init
                          timestamp (ps:chain -date (now))
-                         repeat t))
+                         repeat t))))
+
+(rx:defm three-init-fn ()
+  `(progn
      (defun render ()
        (ps:chain renderer (render scene camera)))
      (defun on-window-resize ()
@@ -43,45 +44,6 @@
        (ps:chain camera (update-projection-matrix))
        (ps:chain renderer (set-size (ps:@ window inner-width)
                                     (ps:@ window inner-height))))
-     (defun update-positions ()
-       (let ((pos (ps:@ line geometry attributes position array))
-             x y z)
-         (dotimes (i *data_points*)
-           (if (= (ps:rem i 2500) 0)
-               (setf x 0 y 0 z 0)
-               (setf x (+ x (* (- (ps:chain -math (random)) 0.5) 30))
-                     y (+ y (* (- (ps:chain -math (random)) 0.5) 30))
-                     z (+ z (* (- (ps:chain -math (random)) 0.5) 30))))
-           (setf (ps:@ pos (* 3 i)) x)
-           (setf (ps:@ pos (+ (* 3 i) 1)) y)
-           (setf (ps:@ pos (+ (* 3 i) 2)) z)))
-       (setf (ps:@ *ac* upper-idx) *data_points*)
-       (setf (ps:@ *ac* data-update) t))
-     (defun update-positions-from (data)
-       (let ((pos (ps:@ line geometry attributes position array)))
-         (dotimes (i (ps:@ data length))
-           (destructuring-bind (x y z) (ps:aref data i)
-             (setf (ps:@ pos (* 3 i)) (parse-float x))
-             (setf (ps:@ pos (+ (* 3 i) 1)) (parse-float y))
-             (setf (ps:@ pos (+ (* 3 i) 2)) (parse-float z)))))
-       (setf (ps:@ *ac* upper-idx) (ps:@ data length))
-       (setf (ps:@ *ac* data-update) t))
-     (rx:js (format nil "
-function updateData () {
-    try {
-        fetch('~a')
-        .then(res => res.text())
-        .then(res => { var r = res.split('\\n'); 
-                       DATA_POINTS = r.length;  // not safe
-                       return r; })
-        .then(res => res.map(line => line.split(';')))
-        .then(res => updatePositionsFrom(res))
-    } catch (e) {
-        console.log('error updateData ' + e.toString());
-        updatePositions();
-        return null;
-    }
-}" (format nil "http://localhost:~a/assets/data.csv" ,port)))
      (defun init ()
        (ps:chain renderer (set-pixel-ratio (ps:@ window device-pixel-ratio)))
        (ps:chain renderer (set-size (ps:@ window inner-width)
@@ -100,7 +62,52 @@ function updateData () {
        (ps:chain scene (add line))
        (ps:chain window (add-event-listener "resize" on-window-resize))
        (update-positions)
-       nil)
+       nil)))
+
+(rx:defm three-fn (port)
+  `(progn
+     (three-globals-fn)
+     (three-init-fn)
+     
+     (defun update-positions ()
+       (let ((pos (ps:@ line geometry attributes position array))
+             x y z)
+         (dotimes (i (ps:@ *ac* upper-idx))
+           (if (= (ps:rem i 2500) 0)
+               (setf x 0 y 0 z 0)
+               (setf x (+ x (* (- (ps:chain -math (random)) 0.5) 30))
+                     y (+ y (* (- (ps:chain -math (random)) 0.5) 30))
+                     z (+ z (* (- (ps:chain -math (random)) 0.5) 30))))
+           (setf (ps:@ pos (* 3 i)) x)
+           (setf (ps:@ pos (+ (* 3 i) 1)) y)
+           (setf (ps:@ pos (+ (* 3 i) 2)) z)))
+       (setf (ps:@ *ac* data-update) t))
+     (defun update-positions-from (data)
+       (let ((pos (ps:@ line geometry attributes position array)))
+         (dotimes (i (ps:@ data length))
+           (destructuring-bind (x y z) (ps:aref data i)
+             (setf (ps:@ pos (* 3 i)) (parse-float x))
+             (setf (ps:@ pos (+ (* 3 i) 1)) (parse-float y))
+             (setf (ps:@ pos (+ (* 3 i) 2)) (parse-float z)))))
+       (setf (ps:@ *ac* upper-idx) (ps:@ data length))
+       (setf (ps:@ *ac* data-update) t))
+     (rx:js (format nil "
+function updateData () {
+    try {
+        fetch('~a')
+        .then(res => res.text())
+        .then(res => { var r = res.split('\\n'); 
+                       AC.upperIdx = r.length;  // not safe
+                       return r; })
+        .then(res => res.map(line => line.split(';')))
+        .then(res => updatePositionsFrom(res))
+    } catch (e) {
+        console.log('error updateData ' + e.toString());
+        updatePositions();
+        return null;
+    }
+}" (format nil "http://localhost:~a/assets/data.csv" ,port)))
+     
      (defun tick ()
        (cond ((eql (ps:@ *ac* mode) :random-init)
               (setf (ps:@ *ac* tick-update) t)
@@ -108,7 +115,6 @@ function updateData () {
               (setf (ps:@ *ac* to-idx) 2)
               (setf (ps:@ *ac* data-update) t)
               (setf (ps:@ *ac* repeat) t)
-              (setf (ps:@ *ac* upper-idx) *data_points*)
               (update-positions)
               (setf (ps:@ *ac* mode) :random))
              ((eql (ps:@ *ac* mode) :random)
