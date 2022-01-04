@@ -4,13 +4,11 @@
 
 (rx:defm three-fn (port)
   `(progn
-     ;;(rx:js "import * as THREE from './three.module.js'")
-     ;;(rx:js "import { OrbitControls } from './OrbitControls.js'")
      (defvar *max_points* 50000)
      (defvar *data_points* 5000)
      (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
      (defvar scene (ps:new (ps:chain -t-h-r-e-e (-scene))))
-     (defvar fov 45)
+     (defvar fov 90)
      (defvar aspect (/ (ps:@ window inner-width)
                        (ps:@ window inner-height)))
      (defvar near 1)
@@ -29,7 +27,6 @@
                                                     (rx:{} color #xff0000
                                                            linewidth 2)))))
      (defvar line (ps:new (ps:chain -t-h-r-e-e (-line geometry material))))
-     (defvar draw-count 2)
      (defvar *ac* (rx:{} from-idx 0
                          to-idx 2
                          upper-idx *data_points*
@@ -99,7 +96,7 @@ function updateData () {
                                 (ps:new (ps:chain -t-h-r-e-e
                                                   (-buffer-attribute
                                                    positions 3)))))
-       (ps:chain geometry (set-draw-range 0 draw-count))
+       (ps:chain geometry (set-draw-range 0 2))
        (ps:chain scene (add line))
        (ps:chain window (add-event-listener "resize" on-window-resize))
        (update-positions)
