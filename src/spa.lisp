@@ -100,8 +100,6 @@
          (rx:route path "/js/react-dom.js" 200 js-hdr *react-dom*)
          (rx:route path "/js/react-bootstrap.js" 200 js-hdr *react-bootstrap*)
          (rx:route path "/js/three.js" 200 js-hdr *three*)
-         ;;(rx:route path "/js/three.module.js" 200 js-hdr *three-module*)
-         ;;(rx:route path "/build/three.module.js" 200 js-hdr *three-module*)
          (rx:route path "/js/OrbitControls.js" 200 js-hdr *orbit-controls*)
          (rx:route path "/js/App.js" 200 js-hdr (app-js))
          (rx:route path "/css/toggle-switch.css" 200 nil *toggle-switch-css* t)

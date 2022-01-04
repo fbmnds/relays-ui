@@ -1,9 +1,22 @@
 
 (in-package :relays-ui)
 
-(rx:defm three-globals-fn ()
+(rx:defm three-state-fn ()
   `(progn
      (defvar *max_points* 50000)
+     (defvar *ac* (rx:{} pos (ps:new (-float32-array (* 3 *max_points*)))
+                         color (ps:new (-float32-array (* 3 *max_points*)))
+                         from-idx 0
+                         to-idx 2
+                         upper-idx *max_points*
+                         tick-update t
+                         data-update ps:false
+                         mode :random-init
+                         timestamp (ps:chain -date (now))
+                         repeat t))))
+
+(rx:defm three-init-fn ()
+  `(progn
      (defvar renderer (ps:new (ps:chain -t-h-r-e-e (-web-g-l-renderer))))
      (defvar scene (ps:new (ps:chain -t-h-r-e-e (-scene))))
      (defvar fov 90)
@@ -20,22 +33,10 @@
                                 camera
                                 (ps:@ renderer dom-element)))))
      (defvar geometry (ps:new (ps:chain -t-h-r-e-e (-buffer-geometry))))
-     (defvar positions (ps:new (-float32-array (* 3 *max_points*))))
      (defvar material (ps:new (ps:chain -t-h-r-e-e (-line-basic-material
-                                                    (rx:{} color #xff0000
+                                                    (rx:{} vertex-colors t
                                                            linewidth 2)))))
      (defvar line (ps:new (ps:chain -t-h-r-e-e (-line geometry material))))
-     (defvar *ac* (rx:{} from-idx 0
-                         to-idx 2
-                         upper-idx 5000
-                         tick-update t
-                         data-update ps:false
-                         mode :random-init
-                         timestamp (ps:chain -date (now))
-                         repeat t))))
-
-(rx:defm three-init-fn ()
-  `(progn
      (defun render ()
        (ps:chain renderer (render scene camera)))
      (defun on-window-resize ()
@@ -57,71 +58,59 @@
                  (set-attribute "position"
                                 (ps:new (ps:chain -t-h-r-e-e
                                                   (-buffer-attribute
-                                                   positions 3)))))
+                                                  (ps:@ *ac* pos) 3)))))
+       (ps:chain geometry
+                 (set-attribute "color"
+                                (ps:new (ps:chain -t-h-r-e-e
+                                                  (-buffer-attribute
+                                                   (ps:@ *ac* color) 3)))))
        (ps:chain geometry (set-draw-range 0 2))
        (ps:chain scene (add line))
        (ps:chain window (add-event-listener "resize" on-window-resize))
-       (update-positions)
-       nil)))
+       ps:undefined)))
 
-(rx:defm three-fn (port)
+(rx:defm three-update-fn (port)
   `(progn
-     (three-globals-fn)
-     (three-init-fn)
-     
-     (defun update-positions ()
-       (let ((pos (ps:@ line geometry attributes position array))
-             x y z)
+     (defun random-positions ()
+       (setf (ps:@ *ac* upper-idx) *max_points*)
+       (let ((pos (ps:@ *ac* pos))
+             (color (ps:@ *ac* color))
+             x y z cx cy cz (r 30))
          (dotimes (i (ps:@ *ac* upper-idx))
            (if (= (ps:rem i 2500) 0)
                (setf x 0 y 0 z 0)
-               (setf x (+ x (* (- (ps:chain -math (random)) 0.5) 30))
-                     y (+ y (* (- (ps:chain -math (random)) 0.5) 30))
-                     z (+ z (* (- (ps:chain -math (random)) 0.5) 30))))
-           (setf (ps:@ pos (* 3 i)) x)
-           (setf (ps:@ pos (+ (* 3 i) 1)) y)
-           (setf (ps:@ pos (+ (* 3 i) 2)) z)))
+               (setf x (+ x (* (- (ps:chain -math (random)) 0.5) r))
+                     y (+ y (* (- (ps:chain -math (random)) 0.5) r))
+                     z (+ z (* (- (ps:chain -math (random)) 0.5) r))))
+           (setf (ps:@ pos (* 3 i)) x
+                 (ps:@ pos (+ (* 3 i) 1)) y
+                 (ps:@ pos (+ (* 3 i) 2)) z)
+           (when (= (ps:rem i 500) 0)
+             (setf cx (+ (/ x r) 0.5)
+                   cy (+ (/ y r) 0.5)
+                   cz (+ (/ z r) 0.5)))
+           (setf (ps:@ color (* 3 i)) cx
+                 (ps:@ color (+ (* 3 i) 1)) cy
+                 (ps:@ color (+ (* 3 i) 2)) cz))
+         (setf (ps:@ line geometry attributes position array) pos)
+         (setf (ps:@ line geometry attributes color array) color))
        (setf (ps:@ *ac* data-update) t))
-     (defun update-positions-from (data)
-       (let ((pos (ps:@ line geometry attributes position array)))
-         (dotimes (i (ps:@ data length))
-           (destructuring-bind (x y z) (ps:aref data i)
-             (setf (ps:@ pos (* 3 i)) (parse-float x))
-             (setf (ps:@ pos (+ (* 3 i) 1)) (parse-float y))
-             (setf (ps:@ pos (+ (* 3 i) 2)) (parse-float z)))))
-       (setf (ps:@ *ac* upper-idx) (ps:@ data length))
-       (setf (ps:@ *ac* data-update) t))
-     (rx:js (format nil "
-function updateData () {
-    try {
-        fetch('~a')
-        .then(res => res.text())
-        .then(res => { var r = res.split('\\n'); 
-                       AC.upperIdx = r.length;  // not safe
-                       return r; })
-        .then(res => res.map(line => line.split(';')))
-        .then(res => updatePositionsFrom(res))
-    } catch (e) {
-        console.log('error updateData ' + e.toString());
-        updatePositions();
-        return null;
-    }
-}" (format nil "http://localhost:~a/assets/data.csv" ,port)))
-     
+
      (defun tick ()
        (cond ((eql (ps:@ *ac* mode) :random-init)
               (setf (ps:@ *ac* tick-update) t)
               (setf (ps:@ *ac* from-idx) 0)
               (setf (ps:@ *ac* to-idx) 2)
+              (setf (ps:@ *ac* upper-idx) *max_points*)
               (setf (ps:@ *ac* data-update) t)
               (setf (ps:@ *ac* repeat) t)
-              (update-positions)
+              (random-positions)
               (setf (ps:@ *ac* mode) :random))
              ((eql (ps:@ *ac* mode) :random)
               (setf (ps:@ *ac* to-idx) (1+ (ps:@ *ac* to-idx)))
               (when (and (ps:@ *ac* repeat)
-                         (=  (ps:@ *ac* to-idx) (ps:@ *ac* uper-idx)))
-                (update-positions)
+                         (=  (ps:@ *ac* to-idx) (ps:@ *ac* upper-idx)))
+                (random-positions)
                 (setf (ps:@ *ac* data-update) t)
                 (setf (ps:@ *ac* to-idx) 2))
               (ps:chain line geometry (set-draw-range (ps:@ *ac* from-idx)
@@ -131,7 +120,6 @@ function updateData () {
               (setf (ps:@ *ac* from-idx) 0)
               (setf (ps:@ *ac* to-idx) 2)
               (setf (ps:@ *ac* repeat) ps:false)
-              (update-data)
               (ps:chain line geometry (set-draw-range (ps:@ *ac* from-idx)
                                                       (ps:@ *ac* to-idx)))
               (setf (ps:@ *ac* mode) :csv-tock))
@@ -151,7 +139,13 @@ function updateData () {
               (setf (ps:@ *ac* timestamp) (+ (ps:chain -date (now)) 500))
               (setf (ps:@ *ac* tick-update) ps:false)
               (setf (ps:@ *ac* mode) :csv-tick))
-             (t nil)))
+             (t nil)))))
+
+(rx:defm three-fn (port)
+  `(progn
+     (three-state-fn)
+     (three-init-fn)
+     (three-update-fn ,port)
      (defun animate ()
        (request-animation-frame animate)
        (ps:chain controls (update))
@@ -159,12 +153,11 @@ function updateData () {
        (when (ps:@ *ac* tick-update)
          (when (ps:@ *ac* data-update)
            (setf (ps:@ line geometry attributes position needs-update) t)
-           (setf (ps:@ *ac* data-update) ps:false))
-         (when (= 0 (ps:rem (ps:@ *ac* to-idx) 500))
-           (ps:chain line material color
-                     (set-h-s-l (ps:chain -math (random)) 1 0.5))))
+           (setf (ps:@ line geometry attributes color needs-update) t)
+           (setf (ps:@ *ac* data-update) ps:false)))
        (ps:chain renderer (render scene camera)))
      (init)
+     (random-positions)
      (animate)))
 
 (rx:defm lines-fn ()
