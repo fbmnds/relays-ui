@@ -70,6 +70,7 @@
        ps:undefined)))
 
 (rx:defm three-update-fn (port)
+  (declare (ignore port))
   `(progn
      (defun random-positions ()
        (setf (ps:@ *ac* upper-idx) *max_points*)
@@ -92,15 +93,19 @@
            (setf (ps:@ color (* 3 i)) cx
                  (ps:@ color (+ (* 3 i) 1)) cy
                  (ps:@ color (+ (* 3 i) 2)) cz))
-         (setf (ps:@ line geometry attributes position array) pos)
-         (setf (ps:@ line geometry attributes color array) color))
+         (setf (ps:@ line geometry attributes position array) pos
+               (ps:@ line geometry attributes color array) color))
        (setf (ps:@ *ac* data-update) t))
 
      (defun update-data ()
        (let ((pos (ps:@ *ac* pos))
-             (color (ps:@ *ac* color)))
-         (setf (ps:@ line geometry attributes position array) pos)
-         (setf (ps:@ line geometry attributes color array) color)))
+             (color (ps:@ *ac* color))
+             (n (* 3 (ps:@ *ac* upper-idx))))
+         (dotimes (i n)
+           (setf (ps:@ (ps:@ line geometry attributes position array) i)
+                 (ps:@ pos i)
+                 (ps:@ line geometry attributes color array)
+                 (ps:@ color i)))))
 
      (defun tick ()
        (cond ((eql (ps:@ *ac* mode) :random-init)
