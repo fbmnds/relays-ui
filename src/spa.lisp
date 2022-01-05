@@ -182,4 +182,5 @@
 
 (defun js (script) (clog:js-execute *clog-body* script))
 
+;; (js "AC.toIdx=4;AC.pos=new Float32Array([0.,0.,0.,500.,0.,0.,500.,500.,0.,500.,500.,500.,500.,0.,500.]);AC.upperIdx=4;")
 
