@@ -96,6 +96,12 @@
          (setf (ps:@ line geometry attributes color array) color))
        (setf (ps:@ *ac* data-update) t))
 
+     (defun update-data ()
+       (let ((pos (ps:@ *ac* pos))
+             (color (ps:@ *ac* color)))
+         (setf (ps:@ line geometry attributes position array) pos)
+         (setf (ps:@ line geometry attributes color array) color)))
+
      (defun tick ()
        (cond ((eql (ps:@ *ac* mode) :random-init)
               (setf (ps:@ *ac* tick-update) t)
@@ -120,6 +126,7 @@
               (setf (ps:@ *ac* from-idx) 0)
               (setf (ps:@ *ac* to-idx) 2)
               (setf (ps:@ *ac* repeat) ps:false)
+              (update-data)
               (ps:chain line geometry (set-draw-range (ps:@ *ac* from-idx)
                                                       (ps:@ *ac* to-idx)))
               (setf (ps:@ *ac* mode) :csv-tock))
