@@ -157,8 +157,10 @@
     (write-spa "js/bootstrap-bundle.js" *bootstrap-bundle-js*)
     (uiop:copy-file *data* (concatenate 'string path "assets/data.csv")))))
 
+(defvar *clog-body* nil)
 ;; Define our CLOG application
 (defun on-new-window (body)
+  (setf *clog-body* body)
   (clog:create-child body *body*)
   (clog:run body)) ; Keep our thread alive until connection closes
                    ; and prevent garbage collection of our CLOG-Objects
@@ -179,6 +181,6 @@
   ;; Open a browser
   (clog:open-browser :url "http://localhost:8000"))
 
-
+(defun js (script) (clog:js-execute *clog-body* script))
 
 
