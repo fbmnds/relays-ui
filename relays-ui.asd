@@ -19,7 +19,8 @@
    #:optima
    #:alexandria
    #:uiop
-   #:clog)
+   #:clog
+   #:cnc-builds)
   :components
   ((:file "packages")
    ;;(:file "psx")

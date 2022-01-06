@@ -10,7 +10,10 @@
                     (#:sp #:spinneret)
                     (#:htm #:html-entities)
                     (#:uiop #:uiop)
-                    (#:clog #:clog))
+                    (#:clog #:clog)
+                    (#:paths #:paths)
+                    (#:paths/emitt #:paths/emitt)
+                    (#:paths/box-tests #:paths/box-tests))
   (:export #:clack-start
            #:clack-stop
            #:export-spa

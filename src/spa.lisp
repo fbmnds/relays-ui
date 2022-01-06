@@ -185,3 +185,42 @@
 
 ;; (js "AC.toIdx=4;AC.pos=new Float32Array([0.,0.,0.,500.,0.,0.,500.,500.,0.,500.,500.,500.,500.,0.,500.]);AC.upperIdx=4;")
 
+(defun colored-path (v l-vec)
+  (let ((pos "")
+        (color "")
+        (z (aref v 2))
+        (cx 180))
+    (dotimes (i (round (/ l-vec 3)))
+      (setf pos (if (= i 0)
+                    (format nil "~3$,~3$,~3$"
+                            (aref v i) (aref v (1+ i)) (aref v (+ i 2)))
+                    (format nil "~a,~3$,~3$,~3$"
+                            pos (aref v i) (aref v (1+ i)) (aref v (+ i 2)))))
+      (unless (= z (aref v (+ i 2)))
+        (setf z (aref v (+ i 2))
+              cx (random 360)))
+      (setf color (if (= i 0)
+                      (format nil "~a,70,100" cx)
+                      (format nil "~a,~a,70,100" color cx))))
+    (values pos color)))
+
+(defun test-path ()
+  (let* ((r 1.5)
+         (p (paths/emitt:close-path
+             (paths/emitt:optimize-path
+              (paths:shift-path-- r
+                                  (car paths/box-tests::tbox)))))
+         (path (paths/emitt:inner-ticks r p))
+         (tags (subseq (paths/emitt:segments-by-length path) 0 4)))
+    (paths/emitt:expand-path path tags 2 -1.5 5 2)))
+
+(defparameter *ac-pos* nil)
+(defparameter *ac-color* nil)
+
+(multiple-value-bind (p c)
+    (multiple-value-bind (v l-vec)
+        (test-path)
+      (colored-path v l-vec))
+  (setf *ac-pos* p *ac-color* c))
+
+
