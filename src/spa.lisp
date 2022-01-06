@@ -189,19 +189,20 @@
   (let ((pos "")
         (color "")
         (z (aref v 2))
-        (cx 180))
-    (dotimes (i (round (/ l-vec 3)))
+        (cx 0.5))
+    (dotimes (i l-vec)
       (setf pos (if (= i 0)
-                    (format nil "~3$,~3$,~3$"
-                            (aref v i) (aref v (1+ i)) (aref v (+ i 2)))
-                    (format nil "~a,~3$,~3$,~3$"
-                            pos (aref v i) (aref v (1+ i)) (aref v (+ i 2)))))
-      (unless (= z (aref v (+ i 2)))
-        (setf z (aref v (+ i 2))
-              cx (random 360)))
-      (setf color (if (= i 0)
-                      (format nil "~a,70,100" cx)
-                      (format nil "~a,~a,70,100" color cx))))
+                    (format nil "~3$" (aref v i))
+                    (format nil "~a,~3$" pos (aref v i))))
+      (when (= 2 (mod i 3))
+        (unless (= z (aref v i))
+          (setf z (aref v i)
+                cx (/ (random 360) 360))))
+      (setf color (cond ((= i 0)
+                         (format nil "~a,70,100" cx)) 
+                        ((= (mod i 3) 0)
+                         (format nil "~a,~a,70,100" color cx))
+                        (t color))))
     (values pos color)))
 
 (defun test-path ()
@@ -222,5 +223,22 @@
         (test-path)
       (colored-path v l-vec))
   (setf *ac-pos* p *ac-color* c))
+
+(defun js-test-path ()
+  (js
+   (format nil
+           "~aAC.pos=new Float32Array([~a]);AC.color=new Float32Array([~a]);~a~a~a~a"
+           "AC.mode='csv-tock';AC.toIdx=2;AC.upperIdx=874;"
+           *ac-pos* *ac-color*
+           "line.geometry.attributes.position.array = AC.pos;"
+           "line.geometry.attributes.color.array = AC.color;"
+           "line.geometry.attributes.position.needsUpdate=true;"
+           "line.geometry.attributes.color.needsUpdate=true;"
+           )))
+
+(defun js-zoom-test-path (fac)
+  (js (format nil "for (var i=0; i<2622; i++) {AC.pos[i]=AC.pos[i]*~3$;}" fac))
+  (js "line.geometry.attributes.position.array = AC.pos;")
+  (js "line.geometry.attributes.position.needsUpdate=true;"))
 
 
