@@ -183,11 +183,13 @@
 
 (defun js (script) (clog:js-execute *clog-body* script))
 
+(defun new-color () (- (random 20) 10.))
+
 (defun colored-path (v l-vec)
   (let ((pos "")
         (color "")
         (z (aref v 2))
-        (cx 0.5))
+        (cx 0.5) (cy 0.5) (cz 0.5))
     (dotimes (i l-vec)
       (setf pos (if (= i 0)
                     (format nil "~3$" (aref v i))
@@ -195,11 +197,11 @@
       (when (= 2 (mod i 3))
         (unless (= z (aref v i))
           (setf z (aref v i)
-                cx (/ (random 360) 360.))))
-      (setf color (cond ((= i 0)
-                         (format nil "~a,70,100" cx)) 
-                        ((= (mod i 3) 0)
-                         (format nil "~a,~5$,70,100" color cx))
+                cx (new-color)
+                cy (new-color)
+                cz (new-color))))
+      (setf color (cond ((= (mod i 3) 0)
+                         (format nil "~a,~5$,~a,~a" color cx cy cz))
                         (t color))))
     (cons pos color)))
 
@@ -218,11 +220,12 @@
 (defparameter *ac-pos* nil)
 (defparameter *ac-color* nil)
 
-(destructuring-bind (p . c)
+(defun set-colored-test-path ()
+  (destructuring-bind (p . c)
     (destructuring-bind (v . l-vec)
         (test-path)
       (colored-path v l-vec))
-  (setf *ac-pos* p *ac-color* c))
+  (setf *ac-pos* p *ac-color* c)))
 
 (defun js-test-path ()
   (js
@@ -233,12 +236,19 @@
            "line.geometry.attributes.position.array = AC.pos;"
            "line.geometry.attributes.color.array = AC.color;"
            "line.geometry.attributes.position.needsUpdate=true;"
-           "line.geometry.attributes.color.needsUpdate=true;"
-           )))
+           "line.geometry.attributes.color.needsUpdate=true;")))
 
 (defun js-zoom-test-path (fac)
   (js (format nil "for (var i=0; i<2622; i++) {AC.pos[i]=AC.pos[i]*~3$;}" fac))
   (js "line.geometry.attributes.position.array = AC.pos;")
   (js "line.geometry.attributes.position.needsUpdate=true;"))
+
+
+(defun js-update-test-path ()
+  (set-colored-test-path)
+  (js-test-path)
+  (js-zoom-test-path 5.))
+
+(defun js-repeat () (js "AC.mode='csv-tick';AC.toIdx=2;"))
 
 
