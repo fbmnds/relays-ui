@@ -183,8 +183,6 @@
 
 (defun js (script) (clog:js-execute *clog-body* script))
 
-;; (js "AC.toIdx=4;AC.pos=new Float32Array([0.,0.,0.,500.,0.,0.,500.,500.,0.,500.,500.,500.,500.,0.,500.]);AC.upperIdx=4;")
-
 (defun colored-path (v l-vec)
   (let ((pos "")
         (color "")
@@ -197,13 +195,13 @@
       (when (= 2 (mod i 3))
         (unless (= z (aref v i))
           (setf z (aref v i)
-                cx (/ (random 360) 360))))
+                cx (/ (random 360) 360.))))
       (setf color (cond ((= i 0)
                          (format nil "~a,70,100" cx)) 
                         ((= (mod i 3) 0)
-                         (format nil "~a,~a,70,100" color cx))
+                         (format nil "~a,~5$,70,100" color cx))
                         (t color))))
-    (values pos color)))
+    (cons pos color)))
 
 (defun test-path ()
   (let* ((r 1.5)
@@ -213,13 +211,15 @@
                                   (car paths/box-tests::tbox)))))
          (path (paths/emitt:inner-ticks r p))
          (tags (subseq (paths/emitt:segments-by-length path) 0 4)))
-    (paths/emitt:expand-path path tags 2 -1.5 5 2)))
+    (multiple-value-bind (v l-vec)
+        (paths/emitt:expand-path path tags 2 -1.5 5 2)
+      (cons v l-vec))))
 
 (defparameter *ac-pos* nil)
 (defparameter *ac-color* nil)
 
-(multiple-value-bind (p c)
-    (multiple-value-bind (v l-vec)
+(destructuring-bind (p . c)
+    (destructuring-bind (v . l-vec)
         (test-path)
       (colored-path v l-vec))
   (setf *ac-pos* p *ac-color* c))
