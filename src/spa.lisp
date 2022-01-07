@@ -182,11 +182,11 @@
 
 (defun js (script) (clog:js-execute *clog-body* script))
 
-(defun new-color () (- (random 20) 10.))
+(defun new-color () (let ((c (- (random 100) 0))) (if (= c 0) 1 (/ 10. c))))
 
 (defun colored-path (v l-vec)
   (let ((pos "")
-        (color "")
+        (color "0.5,0.5,0.5")
         (z (aref v 2))
         (cx 0.5) (cy 0.5) (cz 0.5))
     (dotimes (i l-vec)
@@ -200,7 +200,7 @@
                 cy (new-color)
                 cz (new-color))))
       (setf color (cond ((= (mod i 3) 0)
-                         (format nil "~a,~5$,~a,~a" color cx cy cz))
+                         (format nil "~a,~a,~a,~a" color cx cy cz))
                         (t color))))
     (cons pos color)))
 
