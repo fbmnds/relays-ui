@@ -10,6 +10,7 @@
                          to-idx 2
                          upper-idx *max_points*
                          tick-update t
+                         tick-intervall 500
                          data-update ps:false
                          mode :random-init
                          timestamp (ps:chain -date (now))
@@ -148,7 +149,8 @@
                                                           (ps:@ *ac* to-idx)))
                   (setf (ps:@ *ac* mode) :csv-tock))))
              ((eql (ps:@ *ac* mode) :csv-tock)
-              (setf (ps:@ *ac* timestamp) (+ (ps:chain -date (now)) 500))
+              (setf (ps:@ *ac* timestamp)
+                    (+ (ps:chain -date (now)) (ps:@ *ac* tick-intervall)))
               (setf (ps:@ *ac* tick-update) ps:false)
               (setf (ps:@ *ac* mode) :csv-tick))
              (t nil)))))
