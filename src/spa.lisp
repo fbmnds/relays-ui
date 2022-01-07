@@ -248,6 +248,6 @@
   (js-test-path)
   (js-zoom-test-path 5.))
 
-(defun js-repeat () (js "AC.mode='csv-tick';AC.toIdx=2;"))
+(defun js-repeat () (js "AC.repeat=true;AC.mode='csv-tick';AC.toIdx=2;"))
 
 
