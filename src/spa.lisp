@@ -194,7 +194,7 @@
                     (format nil "~3$" (aref v i))
                     (format nil "~a,~3$" pos (aref v i))))
       (when (= 2 (mod i 3))
-        (unless (= z (aref v i))
+        (when (> z (aref v i))
           (setf z (aref v i)
                 cx (new-color)
                 cy (new-color)
