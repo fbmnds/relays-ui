@@ -19,11 +19,11 @@
       (relay-url-fn)
       (relays-fn -relays-16-e5-f0
                  "http://192.168.178.37"
-                 "ESP-16E5F0"
+                 "ESP-16E5F0 //.178.37"
                  "ts_16e5f0")
       (relays-fn -relays-4-d-c-c5-f
                  "http://192.168.178.63"
-                 "ESP-4DCC5F"
+                 "ESP-4DCC5F //.178.63"
                  "ts_4dcc5f")
       (lines-fn)
       (rx:range-fn)
