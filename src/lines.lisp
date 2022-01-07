@@ -50,6 +50,7 @@
        (ps:chain renderer (set-pixel-ratio (ps:@ window device-pixel-ratio)))
        (ps:chain renderer (set-size (ps:@ window inner-width)
                                     (ps:@ window inner-height)))
+       (ps:chain renderer (set-clear-color #xe0e0e0))
        (ps:chain camera position (set 0 0 1000))
        (ps:chain controls (listen-to-key-events window))
        (setf (ps:@ controls min-distance) 100)
