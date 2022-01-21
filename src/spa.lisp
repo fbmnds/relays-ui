@@ -207,14 +207,14 @@
 
 (defun test-path ()
   (let* ((r 1.5)
-         (p (paths/emitt:close-path
-             (paths/emitt:optimize-path
+         (p (paths:close-path
+             (paths:optimize-path
               (paths:shift-path-- r
-                                  (car paths/box-tests::tbox)))))
-         (path (paths/emitt:inner-ticks r p))
-         (tags (subseq (paths/emitt:segments-by-length path) 0 4)))
+                                  (car paths/tests::tbox)))))
+         (path (paths:inner-ticks r p))
+         (tags (subseq (paths:segments-by-length path) 0 4)))
     (multiple-value-bind (v l-vec)
-        (paths/emitt:expand-path path tags 2 -1.5 5 2)
+        (paths:expand-path path tags 2 -1.5 5 2)
       (cons v l-vec))))
 
 (defparameter *ac-pos* nil)
@@ -243,12 +243,12 @@
   (js "line.geometry.attributes.position.array = AC.pos;")
   (js "line.geometry.attributes.position.needsUpdate=true;"))
 
+(defun js-repeat () (js "AC.repeat=true;AC.mode='csv-tick';AC.toIdx=2;"))
 
 (defun js-update-test-path ()
   (set-colored-test-path)
   (js-test-path)
-  (js-zoom-test-path 5.))
-
-(defun js-repeat () (js "AC.repeat=true;AC.mode='csv-tick';AC.toIdx=2;"))
-
+  (js-zoom-test-path 5.)
+  (js "AC.tickIntervall=50;")
+  (js-repeat))
 
