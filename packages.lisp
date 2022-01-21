@@ -12,8 +12,7 @@
                     (#:uiop #:uiop)
                     (#:clog #:clog)
                     (#:paths #:paths)
-                    (#:paths/emitt #:paths/emitt)
-                    (#:paths/box-tests #:paths/box-tests))
+                    (#:paths/tests #:paths/tests))
   (:export #:clack-start
            #:clack-stop
            #:export-spa
